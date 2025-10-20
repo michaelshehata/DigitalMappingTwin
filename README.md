@@ -11,5 +11,3 @@ This project aims to design and implement a Digital Twin capable of forecasting 
 
 The end result is an interactive web application that enables users to simulate “what-if” scenarios, exploring how policy decisions, population growth, or climate interventions may shape land use in the future.
 
-🧾 License
-This project is licensed under the MIT License — see the LICENSE file for details.
