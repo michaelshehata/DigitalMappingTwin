@@ -20,5 +20,10 @@ cd digital-twin-frontend
 npm install -D tailwindcss postcss autoprefixer
 npx tailwindcss init -p
 
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 # pip install -r requirements.txt
 # npm install vite@latest
