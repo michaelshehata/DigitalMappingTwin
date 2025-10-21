@@ -1,9 +1,16 @@
 import './Header.css'
+import Logo3D from './logo'
 
 function Header() {
     return (
         <header className="header">
             <nav className ="nav">
+
+                {/*Logo container*/}
+                <div className="logo-contaier"></div>
+                <Logo3D />
+
+                {/*Navigation links*/}
                 <a href="#" className="nav-link">Home</a>
                 <a href="#" className="nav-link">Visualization</a>
                 <a href="#" className="nav-link">Analysis</a>

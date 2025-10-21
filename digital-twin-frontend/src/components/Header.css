@@ -12,12 +12,32 @@
 
 .nav {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 3rem;
-  padding: 1rem 2rem;
-  max-width: 1200px;
+  padding: 0.75rem 2rem;
+  max-width: 1400px;
   margin: 0 auto;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+  
+}
+
+.logo-3d-container {
+  display: flex;
+  width: 60px;   
+  height: 60px;  
+  margin-left: -120px;
+  margin-bottom: 0px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
 }
 
 .nav-link {
@@ -30,4 +50,10 @@
 
 .nav-link:hover {
   color: white;
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
 }
