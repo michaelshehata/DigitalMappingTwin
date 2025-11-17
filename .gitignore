@@ -1,3 +1,4 @@
 .env
 .kaggle/
 .kaggle/kaggle.json
+node_modules/
