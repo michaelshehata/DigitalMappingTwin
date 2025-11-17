@@ -14,17 +14,21 @@ function LogoModel({ url }: LogoModelProps) {
   // Rotate the logo continuously
   useFrame(() => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += 0.02 // Rotation speed
+      meshRef.current.rotation.y += 0.01 // Smoother rotation speed
     }
   })
 
-  return <primitive ref={meshRef} object={scene} scale={1.5} />; {/* Increased scale */}
+  return <primitive ref={meshRef} object={scene} scale={1.2} />
 }
 
 function Logo3D() {
   return (
     <div className="logo-3d-container">
-      <Canvas camera={{ position: [0, 0, 3], fov: 50 }}>
+      <Canvas 
+        camera={{ position: [0, 0, 4], fov: 40 }}
+        style={{ background: 'transparent' }}
+        gl={{ alpha: true, antialias: true }}
+      >
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <pointLight position={[-5, -5, -5]} intensity={0.5} />

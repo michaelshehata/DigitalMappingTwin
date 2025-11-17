@@ -1,0 +1,9 @@
+.env
+
+.kaggle/
+kaggle.json
+
+data/raw/
+data/processed/
+*.csv
+*.json
