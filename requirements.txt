@@ -1,0 +1,29 @@
+Pandas==1.5.3
+Scikit-learn==1.2.2
+NumPy==1.24.3
+React==18.2.0
+
+# For 3D globe
+npm install three @react-three/fiber @react-three/drei
+
+# For state management
+npm install zustand
+
+# For API calls
+npm install axios
+
+# For routing (if you want multiple pages)
+npm install react-router-dom
+
+## tailwind setup
+cd digital-twin-frontend
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+# pip install -r requirements.txt
+# npm install vite@latest
