@@ -1,4 +1,12 @@
 .env
+
 .kaggle/
-.kaggle/kaggle.json
+kaggle.json
+
+data/raw/
+data/processed/
+*.csv
+*.json
+
 node_modules/
+
