@@ -1,26 +1,31 @@
-import './App.css'
-import Header from './components/Header'
+import { Routes, Route } from "react-router-dom";
+import "./App.css";
+
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Analysis from "./pages/Analysis";
+import Data from "./pages/Data";
+import Visualization from "./pages/Visualization";
 
 function App() {
   return (
     <>
       <Header />
-      
-      {/* Video Background */}
-      <div className="video-background">
-        <video autoPlay loop muted playsInline className="background-video">
-          <source src="/starry-background.mp4" type="video/mp4" />
-        </video>
-        <div className="video-overlay"></div>
-      </div>
 
-      
-      <div className="container">
-        <h1>Digital Twin</h1>
-        <h3>A digital twin for mapping land use over the next century</h3>
-      </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/analysis" element={<Analysis />} />
+        <Route path="/data" element={<Data />} />
+        <Route path="/visualization" element={<Visualization />} />
+      </Routes>
+
+      <Footer />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

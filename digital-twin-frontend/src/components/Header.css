@@ -1,22 +1,156 @@
+/* =====================
+   HEADER
+===================== */
 .header {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+  width: 100%;
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 1000;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 3000;
 }
 
+/* =====================
+   NAV BAR
+===================== */
 .nav {
+  height: 64px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 1rem 2rem;
+  justify-content: center;
   max-width: 1400px;
   margin: 0 auto;
-  gap: 3rem;
+  position: relative;
 }
 
+/* =====================
+   LOGO
+===================== */
+.logo {
+  position: absolute;
+  left: 20px;
+}
+
+.logo img {
+  height: 32px;
+}
+
+/* =====================
+   DESKTOP LINKS
+===================== */
+.nav-links {
+  display: flex;
+  gap: 3rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  opacity: 0.8;
+}
+
+/* =====================
+   HAMBURGER
+===================== */
+.hamburger {
+  position: absolute;
+  right: 20px;
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 4000; /* above overlay */
+}
+
+.hamburger span {
+  display: block;
+  width: 26px;
+  height: 2px;
+  background: white;
+  margin: 6px 0;
+  transition: 0.3s;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* =====================
+   FULLSCREEN MOBILE MENU
+===================== */
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  background: black;
+
+  display: flex;
+  justify-content: center;     /* vertically center menu */
+  align-items: flex-start;     /* left aligned */
+
+  z-index: 2000;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-menu.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* =====================
+   MOBILE MENU CONTENT
+===================== */
+.menu-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+
+  padding-left: 80px;
+}
+
+.menu-content a {
+  color: white;
+  font-size: 3rem;
+  text-decoration: none;
+  opacity: 0.85;
+}
+
+.menu-content a:hover {
+  opacity: 1;
+}
+
+/* =====================
+   RESPONSIVE RULES
+===================== */
+@media (max-width: 900px) {
+  .nav-links {
+    display: none;
+  }
+
+  .hamburger {
+    display: block;
+  }
+}
+
+@media (min-width: 901px) {
+  .mobile-menu {
+    display: none;
+  }
+}
