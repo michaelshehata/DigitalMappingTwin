@@ -8,3 +8,5 @@ kaggle.api.dataset_download_files(
     path='raw/data', 
     unzip=True
 )
+
+# Kaggle Script to download the dataset

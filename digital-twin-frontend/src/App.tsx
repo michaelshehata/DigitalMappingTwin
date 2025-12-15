@@ -14,7 +14,7 @@ function App() {
         <div className="video-overlay"></div>
       </div>
 
-      {/* Content - h1 and h3 INSIDE container */}
+      
       <div className="container">
         <h1>Digital Twin</h1>
         <h3>A digital twin for mapping land use over the next century</h3>

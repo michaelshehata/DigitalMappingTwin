@@ -82,13 +82,3 @@ h3 {
   }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  h1 {
-    font-size: 3rem;
-  }
-  
-  h3 {
-    font-size: 1.2rem;
-  }
-}
