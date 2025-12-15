@@ -7,12 +7,11 @@ function Header() {
             <nav className ="nav">
 
                 {/*Navigation links*/}
-                <a href="#" className="nav-link">Home</a>
-                <a href="#" className="nav-link">Visualization</a>
-                <a href="#" className="nav-link">Analysis</a>
-                <a href="#" className="nav-link">Scenarios</a>
-                <a href="#" className="nav-link">Data</a>
-                <a href="#" className="nav-link">About</a>
+                <a href="./App.tsx" className="nav-link">Home</a>
+                <a href="./Visualization.tsx" className="nav-link">Visualization</a>
+                <a href="./Analysis.tsx" className="nav-link">Analysis</a>
+                <a href="./Data.tsx" className="nav-link">Data</a>
+                <a href="./About.tsx" className="nav-link">About</a>
                 <a href="https://github.com/michaelshehata/DigitalMappingTwin" className="nav-link">Repository</a>
 
             </nav>
