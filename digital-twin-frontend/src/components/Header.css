@@ -126,10 +126,11 @@
 }
 
 .menu-content a {
-  color: white;
+  color: rgb(255, 255, 255);
   font-size: 3rem;
   text-decoration: none;
   opacity: 0.85;
+  text-align: center;
 }
 
 .menu-content a:hover {
