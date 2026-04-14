@@ -3,10 +3,14 @@
 .kaggle/
 kaggle.json
 
-data/raw/
-data/processed/
+data/norwich_cover/
+
 *.csv
 *.json
 
 node_modules/
 
+/.venv
+
+
+*.pkl

@@ -29,10 +29,15 @@
 .logo {
   position: absolute;
   left: 20px;
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  text-decoration: none;
 }
 
 .logo img {
   height: 32px;
+  width: 32px;
 }
 
 /* =====================

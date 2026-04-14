@@ -21,9 +21,9 @@ function Header() {
       <nav className="nav">
 
         {/* Logo */}
-        <div className="logo">
-          <img src="/favicon_100.png" alt="Logo" />
-        </div>
+        <a className="logo" href="/" aria-label="Home">
+          <img src="/favicon.svg" alt="" width={32} height={32} />
+        </a>
 
         {/* Desktop nav */}
         <ul className="nav-links">
