@@ -1,47 +1,27 @@
-import rasterio
 import numpy as np
+import rasterio
 import joblib
-import matplotlib.pyplot as plt
+
+from scripts.load_data import load_all_data
+
 
 # Load model
 model = joblib.load("model/land_model.pkl")
 
 # Load data
-with rasterio.open("data/norwich_cover/norwich_2020.tif") as src:
-    land2020 = src.read(1)
+X, y, profile = load_all_data()
 
-
-def predict_map(model, image):
-    output = image.copy()
-
-    for i in range(1, image.shape[0] - 1):
-        for j in range(1, image.shape[1] - 1):
-            patch = image[i-1:i+2, j-1:j+2].flatten().reshape(1, -1)
-            pred = model.predict(patch)
-            output[i, j] = pred
-
-    return output
-
-
+# Flatten
+X_flat = X.reshape(-1, X.shape[-1])
 
 # Predict
-pred = predict_map(model, land2020)
+y_pred = model.predict(X_flat)
 
-# Show result
-plt.imshow(pred)
-plt.title("Predicted Land Use")
-plt.colorbar()
-plt.show()
+# Reshape
+pred_map = y_pred.reshape(y.shape)
 
-with rasterio.open(
-    "data/norwich_cover/norwich_2020.tif"
-) as src:
+print("Prediction done")
 
-    profile = src.profile
-
-with rasterio.open(
-    "outputs/predicted_2030.tif",
-    "w",
-    **profile
-) as dst:
-    dst.write(pred.astype(rasterio.uint8), 1)
+# Save
+with rasterio.open("outputs/predicted_map.tif", "w", **profile) as dst:
+    dst.write(pred_map.astype(rasterio.uint8), 1)

@@ -3,7 +3,7 @@
 .kaggle/
 kaggle.json
 
-data/norwich_cover/
+data
 
 *.csv
 *.json
@@ -14,3 +14,4 @@ node_modules/
 
 
 *.pkl
+

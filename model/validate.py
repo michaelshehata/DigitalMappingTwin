@@ -1,38 +1,15 @@
-import rasterio
+from scripts.load_data import load_all_data
 import numpy as np
-import joblib
 from sklearn.metrics import accuracy_score
+import joblib
 
-# Load model
 model = joblib.load("model/land_model.pkl")
 
-# Load data
-with rasterio.open("data/norwich_cover/norwich_2020.tif") as src:
-    land2020 = src.read(1)
+X, y, _ = load_all_data()
 
-with rasterio.open("data/norwich_cover/norwich_2021.tif") as src:
-    land2021 = src.read(1)
+X_flat = X.reshape(-1, X.shape[-1])
+y_flat = y.flatten()
 
+pred = model.predict(X_flat)
 
-def predict_map(model, image):
-    output = image.copy()
-
-    for i in range(1, image.shape[0] - 1):
-        for j in range(1, image.shape[1] - 1):
-            patch = image[i-1:i+2, j-1:j+2].flatten().reshape(1, -1)
-            pred = model.predict(patch)
-            output[i, j] = pred
-
-    return output
-
-
-print("Predicting 2021 from 2020...")
-pred_2021 = predict_map(model, land2020)
-
-# Flatten for comparison
-mask = (land2021 > 0)
-
-y_true = land2021[mask]
-y_pred = pred_2021[mask]
-
-print("Validation Accuracy:", accuracy_score(y_true, y_pred))
+print("Validation Accuracy:", accuracy_score(y_flat, pred))
