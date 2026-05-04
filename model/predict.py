@@ -3,10 +3,12 @@ import rasterio
 import joblib
 
 from scripts.load_data import load_all_data
+from api.weather_api import get_live_weather
+from api.rasterize_live import inject_live_data
 
 
 # Load model
-model = joblib.load("model/land_model.pkl")
+model = joblib.load("model_output/land_model.pkl")
 
 # Load data
 X, y, profile = load_all_data()
