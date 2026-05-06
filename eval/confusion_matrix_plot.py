@@ -5,21 +5,26 @@ import joblib
 
 from scripts.load_data import load_all_data
 
-# Load model + data
-model = joblib.load("model/land_model.pkl")
+model = joblib.load("model_output/random_forest.pkl")
+
 X, y, _ = load_all_data()
 
-# Flatten
 X_flat = X.reshape(-1, X.shape[-1])
 y_flat = y.flatten()
 
-# Predict
-y_pred = model.predict(X_flat)
+chunk_size = 100000
+preds = []
 
-# Confusion matrix
-cm = confusion_matrix(y_flat, y_pred)
+for i in range(0, len(X_flat), chunk_size):
+    chunk = X_flat[i:i + chunk_size]
+    prob = model.predict_proba(chunk)[:, 1]
+    pred = (prob > 0.3).astype(int)
+    preds.append(pred)
 
-# Plot
+preds = np.concatenate(preds)
+
+cm = confusion_matrix(y_flat, preds)
+
 plt.imshow(cm)
 plt.title("Confusion Matrix")
 plt.colorbar()
@@ -27,8 +32,8 @@ plt.colorbar()
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 
-for i in range(cm.shape[0]):
-    for j in range(cm.shape[1]):
+for i in range(2):
+    for j in range(2):
         plt.text(j, i, cm[i, j], ha="center", va="center")
 
 plt.show()

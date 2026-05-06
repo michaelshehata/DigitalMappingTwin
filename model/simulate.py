@@ -3,36 +3,35 @@ import rasterio
 import joblib
 
 from scripts.load_data import load_all_data
-from api.weather_api import get_live_weather
-from api.rasterize_live import inject_live_data
 
 
-model = joblib.load("model/land_model.pkl")
+model = joblib.load("model_output/random_forest.pkl")
 
 X, y, profile = load_all_data()
 
-current = y.copy()  # starting state
-
 
 def simulate(model, X, steps=10):
-    X_flat = X.reshape(-1, X.shape[-1])
+    X_current = X.copy()
 
     for step in range(steps):
-        print(f"Step {step + 1}")
+        print(f"Step {step+1}")
 
-        pred = model.predict(X_flat)
+        X_flat = X_current.reshape(-1, X.shape[-1])
+
+        prob = model.predict_proba(X_flat)[:, 1]
+        pred = (prob > 0.3).astype(np.uint8)
+
         pred_map = pred.reshape(X.shape[:2])
 
-        # Update only target (not features for now)
-        current = pred_map
+        # simple update: inject change into NDVI channel
+        X_current[..., 0] = X_current[..., 0] * (1 - pred_map)
 
-    return current
+    return pred_map
 
 
 future = simulate(model, X, steps=10)
 
-
 with rasterio.open("outputs/future_2100.tif", "w", **profile) as dst:
-    dst.write(future.astype(rasterio.uint8), 1)
+    dst.write(future.astype(np.uint8), 1)
 
 print("Simulation complete")

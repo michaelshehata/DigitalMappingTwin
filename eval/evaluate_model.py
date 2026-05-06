@@ -1,22 +1,31 @@
 import numpy as np
-from sklearn.metrics import accuracy_score, classification_report
 import joblib
+from sklearn.metrics import classification_report, f1_score
 
 from scripts.load_data import load_all_data
 
-# Load model
-model = joblib.load("model/land_model.pkl")
+model = joblib.load("model_output/random_forest.pkl")
 
-# Load data
 X, y, _ = load_all_data()
 
-# Flatten
 X_flat = X.reshape(-1, X.shape[-1])
 y_flat = y.flatten()
 
-# Predict
-y_pred = model.predict(X_flat)
+chunk_size = 100000
+preds = []
 
-# Metrics
-print("Accuracy:", accuracy_score(y_flat, y_pred))
-print("\nClassification Report:\n", classification_report(y_flat, y_pred))
+print("Evaluating in chunks...")
+
+for i in range(0, len(X_flat), chunk_size):
+    chunk = X_flat[i:i + chunk_size]
+
+    prob = model.predict_proba(chunk)[:, 1]
+    pred = (prob > 0.3).astype(int)
+
+    preds.append(pred)
+
+preds = np.concatenate(preds)
+
+print("\nClassification Report:")
+print(classification_report(y_flat, preds))
+print("F1 Score:", f1_score(y_flat, preds))

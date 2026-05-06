@@ -3,27 +3,34 @@ import rasterio
 import joblib
 
 from scripts.load_data import load_all_data
-from api.weather_api import get_live_weather
-from api.rasterize_live import inject_live_data
 
 
-# Load model
-model = joblib.load("model_output/land_model.pkl")
+model = joblib.load("model_output/random_forest.pkl")
 
-# Load data
 X, y, profile = load_all_data()
 
-# Flatten
 X_flat = X.reshape(-1, X.shape[-1])
 
-# Predict
-y_pred = model.predict(X_flat)
+print("Running prediction in chunks...")
 
-# Reshape
-pred_map = y_pred.reshape(y.shape)
+chunk_size = 50000  # adjust if needed
+preds = []
 
-print("Prediction done")
+for i in range(0, len(X_flat), chunk_size):
+    print(f"Processing chunk {i} -> {i + chunk_size}")
 
-# Save
+    chunk = X_flat[i:i + chunk_size]
+
+    prob = model.predict_proba(chunk)[:, 1]
+    pred = (prob > 0.3).astype(np.uint8)
+
+    preds.append(pred)
+
+preds = np.concatenate(preds)
+
+pred_map = preds.reshape(y.shape)
+
+print("Prediction complete")
+
 with rasterio.open("outputs/predicted_map.tif", "w", **profile) as dst:
-    dst.write(pred_map.astype(rasterio.uint8), 1)
+    dst.write(pred_map, 1)

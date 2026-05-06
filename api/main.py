@@ -1,24 +1,16 @@
+# API ENTRY POINT
+
 from fastapi import FastAPI
 import joblib
-import rasterio
 import numpy as np
-import osmnx as ox
+
+from scripts.load_data import load_all_data
+from api.weather_api import get_live_weather
+from api.rasterize_live import inject_live_data
 
 app = FastAPI()
 
-model = joblib.load("model/land_model.pkl")
-
-
-def predict_map(model, image):
-    output = image.copy()
-
-    for i in range(1, image.shape[0] - 1):
-        for j in range(1, image.shape[1] - 1):
-            patch = image[i-1:i+2, j-1:j+2].flatten().reshape(1, -1)
-            pred = model.predict(patch)[0]
-            output[i, j] = pred
-
-    return output
+model = joblib.load("model_output/random_forest.pkl")
 
 
 @app.get("/")
@@ -26,42 +18,31 @@ def root():
     return {"message": "Digital Twin API running"}
 
 
-@app.get("/predict")
-def predict():
-    with rasterio.open("data/norwich_cover/norwich_2021.tif") as src:
-        image = src.read(1)
+@app.get("/predict_live")
+def predict_live():
 
-    result = predict_map(model, image)
+    X, y, _ = load_all_data()
+
+    # Get live weather
+    weather = get_live_weather()
+
+    # Inject into dataset
+    X_live = inject_live_data(X, weather)
+
+    # Flatten
+    X_flat = X_live.reshape(-1, X_live.shape[-1])
+
+    # Chunk prediction
+    preds = []
+    for i in range(0, len(X_flat), 100000):
+        chunk = X_flat[i:i+100000]
+        prob = model.predict_proba(chunk)[:, 1]
+        preds.append((prob > 0.3).astype(int))
+
+    preds = np.concatenate(preds)
 
     return {
-        "status": "prediction complete",
-        "shape": result.shape
+        "status": "success",
+        "temperature": weather["temperature"],
+        "predicted_change_pixels": int(preds.sum())
     }
-
-
-@app.get("/simulate")
-def simulate(steps: int = 2):
-    with rasterio.open("data/norwich_cover/norwich_2021.tif") as src:
-        current = src.read(1)
-
-    for _ in range(steps):
-        current = predict_map(model, current)
-
-    return {
-        "status": "simulation complete",
-        "steps": steps
-    }
-
-
-@app.get("/osm")
-def get_osm():
-    gdf = ox.geometries_from_place("Norwich, UK", tags={"building": True})
-    return {
-        "status": "osm data fetched",
-        "features": len(gdf)
-    }
-
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}

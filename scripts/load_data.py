@@ -1,19 +1,17 @@
 import rasterio
 import numpy as np
 from rasterio.warp import reproject, Resampling
-from pathlib import Path   
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, "data")
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Load raster with profile
 def load_raster(path):
     with rasterio.open(path) as src:
         return src.read(1), src.profile
 
 
-# Align raster to reference
 def align_to_ref(source_array, source_profile, ref_profile, method="bilinear"):
     aligned = np.empty(
         (ref_profile['height'], ref_profile['width']),
@@ -38,55 +36,108 @@ def align_to_ref(source_array, source_profile, ref_profile, method="bilinear"):
     return aligned
 
 
-# Load ALL datasets
+def clean_ndvi(arr):
+    if np.isnan(arr).all():
+        return np.zeros_like(arr)
+    return np.nan_to_num(arr, nan=np.nanmean(arr))
+
+
+def clean_generic(arr):
+    return np.nan_to_num(arr, nan=np.nanmax(arr))
+
+
+def normalize(arr):
+    min_val = np.min(arr)
+    max_val = np.max(arr)
+
+    if max_val - min_val == 0:
+        return arr
+
+    return (arr - min_val) / (max_val - min_val)
+
+
+def process_year(year, ref_profile):
+    ndvi, ndvi_profile = load_raster(
+        os.path.join(DATA_DIR, f"ndvi/norwich_ndvi_{year}.tif")
+    )
+    pop, pop_profile = load_raster(
+        os.path.join(DATA_DIR, f"population/norwich_population_{year}.tif")
+    )
+    temp, temp_profile = load_raster(
+        os.path.join(DATA_DIR, f"temperature/norwich_temperature_{year}.tif")
+    )
+
+    ndvi = align_to_ref(ndvi, ndvi_profile, ref_profile)
+    pop = align_to_ref(pop, pop_profile, ref_profile)
+    temp = align_to_ref(temp, temp_profile, ref_profile)
+
+    ndvi = normalize(clean_ndvi(ndvi))
+    pop = normalize(clean_generic(pop))
+    temp = normalize(clean_generic(temp))
+
+    return ndvi, pop, temp
+
+
+def load_static(ref_profile):
+    elev, elev_profile = load_raster(
+        os.path.join(DATA_DIR, "elevation/norwich_elevation.tif")
+    )
+    water, water_profile = load_raster(
+        os.path.join(DATA_DIR, "distance/norwich_distwater.tif")
+    )
+
+    elev = normalize(clean_generic(align_to_ref(elev, elev_profile, ref_profile)))
+    water = normalize(clean_generic(align_to_ref(water, water_profile, ref_profile)))
+
+    return elev, water
+
+
 def load_all_data():
 
-    # LAND COVER
-    land_2020, ref_profile = load_raster(BASE_DIR / "data/landcover/norwich_landcover_2020.tif")
-    land_2021, _ = load_raster(BASE_DIR / "data/landcover/norwich_landcover_2021.tif")
+    years = [2016, 2017, 2018, 2019, 2020]
 
-    # OTHER DATASETS
-    ndvi, ndvi_profile = load_raster(BASE_DIR / "data/ndvi/norwich_ndvi.tif")
-    elevation, elev_profile = load_raster(BASE_DIR / "data/elevation/norwich_elevation.tif")
-    population, pop_profile = load_raster(BASE_DIR / "data/population/norwich_population.tif")
-    temperature, temp_profile = load_raster(BASE_DIR / "data/temperature/norwich_temperature.tif")
-    water_dist, water_profile = load_raster(BASE_DIR / "data/distance/norwich_distwater.tif")
+    land_0, ref_profile = load_raster(
+        os.path.join(DATA_DIR, f"dynamicworld/norwich_dynamicworld_{years[0]}.tif")
+    )
 
-    # ALIGN EVERYTHING
-    ndvi = align_to_ref(ndvi, ndvi_profile, ref_profile)
-    elevation = align_to_ref(elevation, elev_profile, ref_profile)
-    population = align_to_ref(population, pop_profile, ref_profile)
-    temperature = align_to_ref(temperature, temp_profile, ref_profile)
-    water_dist = align_to_ref(water_dist, water_profile, ref_profile)
+    elevation, water = load_static(ref_profile)
 
-    # PRINT SHAPES
-    print("All aligned shapes:")
-    print("Land 2020:", land_2020.shape)
-    print("NDVI:", ndvi.shape)
-    print("Elevation:", elevation.shape)
-    print("Population:", population.shape)
-    print("Temperature:", temperature.shape)
-    print("Water distance:", water_dist.shape)
+    X_list = []
+    y_list = []
 
-    # STACK FEATURES
-    X = np.stack([
-        ndvi,
-        elevation,
-        population,
-        temperature,
-        water_dist
-    ], axis=-1)
+    for i in range(len(years) - 1):
 
-    # TARGET
-    y = (land_2021 != land_2020).astype(np.uint8)
+        y1 = years[i]
+        y2 = years[i + 1]
 
-    return X, y, ref_profile
+        print(f"Processing: {y1} -> {y2}")
 
+        ndvi, pop, temp = process_year(y1, ref_profile)
 
-# RUN SCRIPT
-if __name__ == "__main__":
-    X, y, profile = load_all_data()
+        X = np.stack([ndvi, pop, temp, elevation, water], axis=-1)
+
+        land_t, _ = load_raster(
+            os.path.join(DATA_DIR, f"dynamicworld/norwich_dynamicworld_{y1}.tif")
+        )
+        land_t1, _ = load_raster(
+            os.path.join(DATA_DIR, f"dynamicworld/norwich_dynamicworld_{y2}.tif")
+        )
+
+        y = (land_t1 != land_t).astype(np.uint8)
+
+        X_list.append(X)
+        y_list.append(y)
+
+    X_final = np.concatenate(X_list, axis=0)
+    y_final = np.concatenate(y_list, axis=0)
 
     print("\nFinal dataset:")
-    print("X shape:", X.shape)
-    print("y shape:", y.shape)
+    print("X shape:", X_final.shape)
+    print("y shape:", y_final.shape)
+    print("NaNs:", np.isnan(X_final).sum())
+
+    return X_final, y_final, ref_profile
+
+
+if __name__ == "__main__":
+    load_all_data()

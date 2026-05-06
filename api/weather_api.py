@@ -1,12 +1,15 @@
-# api/weather_api.py
+# FETCH LIVE WEATHER
 
 import requests
+import os
+from dotenv import load_dotenv
 
-API_KEY = "YOUR_API_KEY"  # replace later
+load_dotenv()
 
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 
 def get_live_weather(city="Norwich"):
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API_KEY}&units=metric"
 
     response = requests.get(url)
 
