@@ -1,9 +1,8 @@
-import rasterio
-
 from rasterio.features import shapes
+import rasterio
 import geopandas as gpd
 
-print("Converting raster to GeoJSON...")
+print("Converting raster to simplified GeoJSON...")
 
 with rasterio.open("outputs/predicted_map.tif") as src:
     image = src.read(1)
@@ -11,10 +10,7 @@ with rasterio.open("outputs/predicted_map.tif") as src:
     mask = image == 1
 
     results = (
-        {
-            "properties": {"prediction": 1},
-            "geometry": s
-        }
+        {"properties": {"prediction": 1}, "geometry": s}
         for s, v in shapes(
             image,
             mask=mask,
@@ -29,9 +25,19 @@ with rasterio.open("outputs/predicted_map.tif") as src:
         crs=src.crs
     )
 
+# HUGE PERFORMANCE BOOST
+gdf["geometry"] = gdf.geometry.simplify(
+    tolerance=0.0005,
+    preserve_topology=True
+)
+
+# REMOVE INVALID GEOMETRIES
+gdf = gdf[gdf.is_valid]
+
+# SAVE
 gdf.to_file(
-    "outputs/predicted_map.geojson",
+    "frontend/public/data/predicted_map.geojson",
     driver="GeoJSON"
 )
 
-print("GeoJSON exported successfully")
+print("Simplified GeoJSON saved.")

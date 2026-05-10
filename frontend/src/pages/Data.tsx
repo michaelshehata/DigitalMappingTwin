@@ -2,16 +2,43 @@ import "./Data.css";
 
 function Data() {
   return (
-    <div className="data-page">
+    <div className="page-wrapper">
 
-      <h1>Data Sources</h1>
+      <div className="page-content">
 
-      <ul>
-        <li>Sentinel-2 Satellite Imagery</li>
-        <li>OpenStreetMap GIS Layers</li>
-        <li>UK Census Population Data</li>
-        <li>CORINE Land Cover Dataset</li>
-      </ul>
+        <div className="content-card">
+
+          <h1 className="page-title">
+            Data Sources
+          </h1>
+
+          <div className="data-grid">
+
+            <div className="data-card">
+              <h2>Satellite Imagery</h2>
+              <p>Sentinel-2 Multispectral Data</p>
+            </div>
+
+            <div className="data-card">
+              <h2>GIS Layers</h2>
+              <p>OpenStreetMap + Norwich Boundaries</p>
+            </div>
+
+            <div className="data-card">
+              <h2>Population Data</h2>
+              <p>UK Census & Demographic Statistics</p>
+            </div>
+
+            <div className="data-card">
+              <h2>Land Cover</h2>
+              <p>CORINE Environmental Dataset</p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
 
     </div>
   );

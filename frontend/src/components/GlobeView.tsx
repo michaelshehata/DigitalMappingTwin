@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+
 import {
   Viewer as CesiumViewer,
   Ion,
@@ -20,7 +21,13 @@ const NORWICH = {
   latitude: 52.6309,
 };
 
-function GlobeView() {
+type GlobeViewProps = {
+  showPredictions: boolean;
+};
+
+function GlobeView({
+  showPredictions,
+}: GlobeViewProps) {
   const viewerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -39,6 +46,7 @@ function GlobeView() {
       fullscreenButton: false,
     });
 
+    // SATELLITE IMAGERY
     ArcGisMapServerImageryProvider.fromUrl(
       "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
     ).then((provider) => {
@@ -49,15 +57,17 @@ function GlobeView() {
       );
     });
 
+    // CAMERA POSITION
     viewer.camera.flyTo({
       destination: Cartesian3.fromDegrees(
         NORWICH.longitude,
         NORWICH.latitude,
-        25000
+        35000
       ),
       duration: 2,
     });
 
+    // NORWICH MARKER
     viewer.entities.add(
       new Entity({
         name: "Norwich",
@@ -72,20 +82,24 @@ function GlobeView() {
       })
     );
 
-    // LOAD ML PREDICTION GEOJSON
-    GeoJsonDataSource.load("/data/predicted_map.geojson", {
-      stroke: Color.RED,
-      fill: Color.RED.withAlpha(0.35),
-      strokeWidth: 2,
-    }).then((dataSource) => {
-      viewer.dataSources.add(dataSource);
-      console.log(dataSource.entities.values.length);
-    });
+    // LOAD PREDICTIONS
+    if (showPredictions) {
+      GeoJsonDataSource.load(
+        "/data/predicted_map.geojson",
+        {
+          stroke: Color.RED,
+          fill: Color.RED.withAlpha(0.35),
+          strokeWidth: 1,
+        }
+      ).then((dataSource) => {
+        viewer.dataSources.add(dataSource);
+      });
+    }
 
     return () => {
       viewer.destroy();
     };
-  }, []);
+  }, [showPredictions]);
 
   return (
     <div
