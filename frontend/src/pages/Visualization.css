@@ -1,0 +1,24 @@
+.visualization-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  height: calc(100vh - 120px);
+  gap: 1rem;
+  padding: 1rem;
+  background: #05070d;
+  color: white;
+}
+
+.left-panel,
+.right-panel {
+  background: rgba(15, 18, 28, 0.9);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.map-panel {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+}
