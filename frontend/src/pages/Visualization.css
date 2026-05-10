@@ -1,78 +1,95 @@
 .visualization-page {
+  width: 100%;
   min-height: 100vh;
-  background: #000;
-  display: flex;
-  flex-direction: column;
+  background: black;
+  color: white;
+  padding: 2rem;
+  box-sizing: border-box;
 }
 
-/* MAIN GRID */
-
 .visualization-layout {
-  flex: 1;
-
   display: grid;
-
-  grid-template-columns:
-    260px
-    1fr
-    300px;
-
-  gap: 24px;
-
-  padding: 24px;
-
-  align-items: stretch;
+  grid-template-columns: 320px 1fr 320px;
+  gap: 2rem;
+  align-items: start;
 }
 
 /* LEFT PANEL */
 
-.left-panel {
-  background: rgba(10, 10, 10, 0.95);
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  border-radius: 20px;
-
-  padding: 24px;
+.controls-panel {
+  background: #050505;
+  border: 1px solid #1a1a1a;
+  border-radius: 24px;
+  padding: 2rem;
+  height: 700px;
 }
 
-/* CENTER GLOBE */
+.controls-panel h2 {
+  margin-bottom: 2rem;
+  font-size: 2.4rem;
+}
 
-.center-panel {
-  height: 78vh;
+.slider-group {
+  margin-bottom: 2rem;
+}
 
-  border-radius: 20px;
+.slider-group label {
+  display: block;
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+}
 
+.slider-group input {
+  width: 100%;
+}
+
+.run-button {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 14px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+/* CENTER PANEL */
+
+.globe-panel {
+  height: 700px;
+  border-radius: 24px;
   overflow: hidden;
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  background: #020617;
-
-  position: relative;
+  border: 1px solid #1a1a1a;
 }
 
 /* RIGHT PANEL */
 
-.right-panel {
-  background: rgba(10, 10, 10, 0.95);
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  border-radius: 20px;
-
-  padding: 24px;
+.analytics-panel {
+  background: #050505;
+  border: 1px solid #1a1a1a;
+  border-radius: 24px;
+  padding: 2rem;
+  height: 700px;
 }
 
-/* MOBILE */
+.analytics-panel h2 {
+  margin-bottom: 2rem;
+  font-size: 2.4rem;
+}
 
-@media (max-width: 1200px) {
+.stat-card {
+  background: #020b30;
+  border: 1px solid #102060;
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
 
-  .visualization-layout {
-    grid-template-columns: 1fr;
-  }
+.stat-card h3 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
 
-  .center-panel {
-    height: 60vh;
-  }
+.stat-card p {
+  font-size: 1.2rem;
 }

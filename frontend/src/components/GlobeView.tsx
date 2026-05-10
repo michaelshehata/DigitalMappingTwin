@@ -1,24 +1,17 @@
-import {
-  Viewer,
-  Entity,
-  CameraFlyTo
-} from "resium";
-
-import {
-  Cartesian3,
-  Ion
-} from "cesium";
+import { Viewer } from "resium";
+import { Ion } from "cesium";
 
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import "./GlobeView.css";
 
-Ion.defaultAccessToken = "";
+Ion.defaultAccessToken = import.meta.env.VITE_MAPBOX_TOKEN || "";
 
 function GlobeView() {
   return (
-    <div className="globe-wrapper">
+    <div className="globe-container">
       <Viewer
-        full
+        className="cesium-viewer-custom"
+        full={false}
         animation={false}
         timeline={false}
         baseLayerPicker={false}
@@ -26,26 +19,10 @@ function GlobeView() {
         homeButton={false}
         sceneModePicker={false}
         navigationHelpButton={false}
-      >
-        <CameraFlyTo
-          destination={Cartesian3.fromDegrees(
-            -0.1276,
-            51.5072,
-            2500000
-          )}
-        />
-
-        <Entity
-          name="London"
-          position={Cartesian3.fromDegrees(
-            -0.1276,
-            51.5072
-          )}
-          point={{
-            pixelSize: 10
-          }}
-        />
-      </Viewer>
+        infoBox={false}
+        selectionIndicator={false}
+        fullscreenButton={false}
+      />
     </div>
   );
 }
