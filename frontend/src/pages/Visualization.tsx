@@ -1,28 +1,35 @@
 import "./Visualization.css";
 
-import MapView from "../components/MapView";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+
 import ScenarioPanel from "../components/ScenarioPanel";
 import AnalyticsPanel from "../components/AnalyticsPanel";
+import GlobeView from "../components/GlobeView";
 
 function Visualization() {
   return (
     <div className="visualization-page">
 
-      <div className="visualization-grid">
+      <Header />
 
-        <aside className="visual-panel">
+      <main className="visualization-layout">
+
+        <aside className="left-panel">
           <ScenarioPanel />
         </aside>
 
-        <section className="map-section">
-          <MapView />
+        <section className="center-panel">
+          <GlobeView />
         </section>
 
-        <aside className="visual-panel">
+        <aside className="right-panel">
           <AnalyticsPanel />
         </aside>
 
-      </div>
+      </main>
+
+      <Footer />
 
     </div>
   );
