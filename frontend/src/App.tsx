@@ -12,19 +12,23 @@ import Visualization from "./pages/Visualization";
 
 function App() {
   return (
-    <>
+    <div className="app">
+
       <Header />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/analysis" element={<Analysis />} />
-        <Route path="/data" element={<Data />} />
-        <Route path="/visualization" element={<Visualization />} />
-      </Routes>
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/visualization" element={<Visualization />} />
+          <Route path="/analysis" element={<Analysis />} />
+          <Route path="/data" element={<Data />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </main>
 
       <Footer />
-    </>
+
+    </div>
   );
 }
 

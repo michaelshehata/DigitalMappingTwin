@@ -1,23 +1,28 @@
 import "./Visualization.css";
-import MapView from "../components/MapView.tsx";
-import ScenarioPanel from "../components/ScenarioPanel.tsx";
-import AnalyticsPanel from "../components/AnalyticsPanel.tsx";
+
+import MapView from "../components/MapView";
+import ScenarioPanel from "../components/ScenarioPanel";
+import AnalyticsPanel from "../components/AnalyticsPanel";
 
 function Visualization() {
   return (
-    <div className="visualization-layout">
+    <div className="visualization-page">
 
-      <aside className="left-panel">
-        <ScenarioPanel />
-      </aside>
+      <div className="visualization-grid">
 
-      <main className="map-panel">
-        <MapView />
-      </main>
+        <aside className="visual-panel">
+          <ScenarioPanel />
+        </aside>
 
-      <aside className="right-panel">
-        <AnalyticsPanel />
-      </aside>
+        <section className="map-section">
+          <MapView />
+        </section>
+
+        <aside className="visual-panel">
+          <AnalyticsPanel />
+        </aside>
+
+      </div>
 
     </div>
   );
