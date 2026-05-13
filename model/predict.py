@@ -11,7 +11,7 @@ X, y, profile = load_all_data()
 
 X_flat = X.reshape(-1, X.shape[-1])
 
-print("Running prediction in chunks...")
+print("Running prediction in chunks:")
 
 chunk_size = 50000  # adjust if needed
 preds = []

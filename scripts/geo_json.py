@@ -2,7 +2,7 @@ from rasterio.features import shapes
 import rasterio
 import geopandas as gpd
 
-print("Converting raster to simplified GeoJSON...")
+print("Converting raster to simplified GeoJSON:")
 
 with rasterio.open("outputs/predicted_map.tif") as src:
     image = src.read(1)

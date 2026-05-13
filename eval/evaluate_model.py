@@ -14,7 +14,7 @@ y_flat = y.flatten()
 chunk_size = 100000
 preds = []
 
-print("Evaluating in chunks...")
+print("Evaluating in chunks:")
 
 for i in range(0, len(X_flat), chunk_size):
     chunk = X_flat[i:i + chunk_size]
