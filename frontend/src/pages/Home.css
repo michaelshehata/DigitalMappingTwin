@@ -32,7 +32,7 @@
 }
 
 .container {
-  padding-top: 120px; /* below fixed header */
+  padding-top: 80px; /* below fixed header */
   padding-left: 20px;
   padding-right: 20px;
 
@@ -45,6 +45,7 @@
   align-items: center;
   color: aliceblue;
   text-align: center;
+  
 }
 
 h1 {
@@ -56,7 +57,39 @@ h1 {
 h3 {
   font-size: clamp(1rem, 2.8vw, 1.35rem);
   font-weight: 400;
-  max-width: 36rem;
+  max-width: 60rem;
   line-height: 1.45;
   opacity: 0.92;
+  white-space: nowrap;
+}
+
+.mappingHighlight {
+  display: inline-block;
+
+  background: linear-gradient(
+    90deg,
+    #2563eb,
+    #06b6d4,
+    #22c55e,
+    #06b6d4,
+    #2563eb
+  );
+
+  background-size: 300% auto;
+
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: gradientMove 6s linear infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% center;
+  }
+
+  100% {
+    background-position: 300% center;
+  }
 }
