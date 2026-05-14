@@ -1,0 +1,17 @@
+.particles-wrapper {
+  width: 300px;
+  height: 140px;
+
+  position: relative;
+
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  border-radius: 0;
+
+  overflow: hidden;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

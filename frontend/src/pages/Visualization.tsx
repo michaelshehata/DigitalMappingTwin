@@ -46,8 +46,8 @@ function Visualization() {
 
           <div className="slider-group">
             <label>
-              Urban Expansion:
-              {urbanExpansion}%
+              Urban Expansion: {urbanExpansion}%
+              
             </label>
 
             <input
@@ -65,8 +65,8 @@ function Visualization() {
 
           <div className="slider-group">
             <label>
-              Temperature Increase:
-              {temperatureIncrease}°C
+              Temperature Increase: {temperatureIncrease}°C
+              
             </label>
 
             <input
@@ -85,8 +85,8 @@ function Visualization() {
 
           <div className="slider-group">
             <label>
-              Population Growth:
-              {populationGrowth}%
+              Population Growth: {populationGrowth}%
+              
             </label>
 
             <input
@@ -104,8 +104,8 @@ function Visualization() {
 
           <div className="slider-group">
             <label>
-              Simulation Year:
-              {simulationYear}
+              Simulation Year: {simulationYear}
+              
             </label>
 
             <input
@@ -121,9 +121,9 @@ function Visualization() {
             />
           </div>
 
-          <div className="slider-group">
+          <div className="prediction-toggle">
 
-            <label>
+            <label className="prediction-switch">
 
               <input
                 type="checkbox"
@@ -135,10 +135,13 @@ function Visualization() {
                 }
               />
 
-              {" "}
-              Show Prediction Layer
+              <span className="slider"></span>
 
             </label>
+
+              <p className="predictionText">
+                Show Prediction Layer
+              </p>
 
           </div>
 
@@ -207,8 +210,8 @@ function Visualization() {
             </h3>
 
             <p>
-              Forecast model for
-              {simulationYear}
+              Forecast model for {simulationYear}
+              
             </p>
           </div>
 

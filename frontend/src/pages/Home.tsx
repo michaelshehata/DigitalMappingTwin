@@ -24,7 +24,7 @@ function Home() {
 
       <div className="container">
         <h1>Digital Mapping Twin</h1>
-        <h3>A digital twin for mapping land use over the next century!</h3>
+        <h3>A digital twin for mapping land use in <strong>Norwich </strong>over the next century!</h3>
       </div>
     </main>
   );

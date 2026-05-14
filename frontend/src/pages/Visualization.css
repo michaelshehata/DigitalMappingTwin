@@ -1,3 +1,7 @@
+h2{
+  text-align: center;
+}
+
 .visualization-page {
   width: 100%;
   min-height: 100vh;
@@ -17,9 +21,8 @@
 /* LEFT PANEL */
 
 .controls-panel {
-  background: #050505;
-  border: 1px solid #1a1a1a;
-  border-radius: 24px;
+  background: #000;
+
   padding: 2rem;
   height: 700px;
 }
@@ -57,17 +60,14 @@
 
 .globe-panel {
   height: 700px;
-  border-radius: 24px;
   overflow: hidden;
-  border: 1px solid #1a1a1a;
 }
 
 /* RIGHT PANEL */
 
 .analytics-panel {
-  background: #050505;
-  border: 1px solid #1a1a1a;
-  border-radius: 24px;
+  background: #000;
+
 
   padding: 1.5rem;
 
@@ -85,8 +85,7 @@
 
 .stat-card {
   background: #020b30;
-  border: 1px solid #102060;
-  border-radius: 18px;
+
 
   padding: 1rem;
   margin-bottom: 1rem;
@@ -96,14 +95,111 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  text-align: center;
 }
 
 .stat-card h3 {
   margin-bottom: 0.5rem;
   font-size: 1.2rem;
   line-height: 1.3;
+  text-align: center;
 }
 
 .stat-card p {
   font-size: 1rem;
+  text-align: center;
+}
+
+.prediction-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  padding: 20px;
+}
+
+/* Hide default checkbox */
+.prediction-switch input {
+  display: none;
+}
+
+.prediction-switch {
+  position: relative;
+  top: -20px;
+  width: 64px;
+  height: 34px;
+
+  display: inline-block;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+
+  background: #111;
+
+  border-radius: 999px;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+
+  border: 2px solid #444;
+
+  box-shadow:
+    0 0 8px rgba(255,255,255,0.08);
+}
+
+.slider::before {
+  content: "";
+
+  position: absolute;
+
+  width: 24px;
+  height: 24px;
+
+  left: 4px;
+  top: 3px;
+
+  background: white;
+
+  border-radius: 50%;
+
+  transition: 0.25s ease;
+}
+
+.prediction-switch input:checked + .slider {
+  background: #ffffff;
+
+  border-color: #ffffff;
+}
+
+.prediction-switch input:checked + .slider::before {
+  transform: translateX(28px);
+
+  background: #000;
+}
+
+.predictionText {
+
+
+  margin: 0;
+
+  text-align: center;
+
+  font-size: 1.2rem;
+
+  font-weight: 600;
+
+  color: white;
+
+  letter-spacing: 0.5px;
+
+  text-shadow:
+    0 0 6px rgba(255,255,255,0.8),
+    0 0 12px rgba(255,255,255,0.4);
 }
