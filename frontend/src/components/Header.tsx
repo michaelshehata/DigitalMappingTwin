@@ -47,7 +47,8 @@ function Header() {
         <button
           className={`hamburger ${open ? "open" : ""}`}
           onClick={() => setOpen(prev => !prev)}
-          aria-label="Menu"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
         >
           <span />
           <span />
