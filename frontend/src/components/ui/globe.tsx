@@ -2,11 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import GlobeGL from "globe.gl";
-import countries from "../../data/globe.json";
 
 type GlobeProps = {
   globeConfig?: {
-    globeColor?: string;
     autoRotate?: boolean;
     autoRotateSpeed?: number;
   };
@@ -21,26 +19,34 @@ export function Globe({ globeConfig }: GlobeProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const GlobeConstructor = GlobeGL as any;
 
-    const globe = GlobeConstructor()(globeRef.current)
-      .globeImageUrl(
-        "//unpkg.com/three-globe/example/img/earth-dark.jpg"
-      )
+    const globe = GlobeConstructor()(globeRef.current);
+
+    globe
+      // NO REALISTIC EARTH TEXTURE
+      .globeImageUrl("//unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
+
+      // TRANSPARENT BG
       .backgroundColor("rgba(0,0,0,0)")
-      .polygonsData(countries.features)
-      .polygonCapColor(
-        () => globeConfig?.globeColor || "#062056"
-      )
-      .polygonSideColor(
-        () => "rgba(255,255,255,0.05)"
-      )
-      .polygonStrokeColor(() => "#111")
-      .polygonAltitude(0.01);
+
+      // ATMOSPHERE GLOW
+      .showAtmosphere(true)
+      .atmosphereColor("#00d4ff")
+      .atmosphereAltitude(0.22);
 
     globe.controls().autoRotate =
       globeConfig?.autoRotate ?? true;
 
     globe.controls().autoRotateSpeed =
       globeConfig?.autoRotateSpeed ?? 0.5;
+
+    globe.pointOfView(
+      {
+        lat: 20,
+        lng: 0,
+        altitude: 2,
+      },
+      0
+    );
 
     return () => {
       globe._destructor();

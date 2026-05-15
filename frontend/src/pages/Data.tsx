@@ -28,10 +28,10 @@ const dataSources = [
   {
     title: "Population Data",
     image:
-      "https://developers.google.com/earth-engine/datasets/images/WorldPop/WorldPop_GP_100m_pop_sample.png",
+      "https://miro.medium.com/v2/resize:fit:1100/format:webp/1*j-cTRXVuaJT2tjJQk5fD6A.png",
 
     description:
-      "add.",
+      "Worldpop provides high-resolution global population estimates at 100 m resolution.",
 
     link:
       "https://developers.google.com/earth-engine/datasets/catalog/WorldPop_GP_100m_pop"
@@ -40,10 +40,10 @@ const dataSources = [
   {
     title: "Vegetation",
     image:
-      "https://developers.google.com/earth-engine/datasets/images/COPERNICUS/COPERNICUS_S2_SR_HARMONIZED_sample.png",
+      "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2020/05/southern_ukraine/21988511-1-eng-GB/Southern_Ukraine.jpg",
 
     description:
-      "Land cover classification maps for environmental and urban planning analysis.",
+      "Sentinel-2 is a satellite mission that provides high-resolution optical imagery for land cover classification maps for environmental and urban planning analysis.",
 
     link:
       "https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED"
@@ -52,10 +52,10 @@ const dataSources = [
   {
     title: "Elevation",
     image:
-      "https://developers.google.com/earth-engine/datasets/images/USGS/USGS_SRTMGL1_003_sample.png",
+      "https://www.researchgate.net/publication/237707716/figure/fig2/AS:298948293087236@1448286235339/Digital-elevation-model-DTED2-of-the-study-area-Height-of-the-scale-bar-expressed-in.png",
 
     description:
-      "Global digital elevation model produced from NASA’s SRTM. It provides near global elevation data at 30m resolution.",
+      "SRTM is a global digital elevation model produced by NASA. It provides near global elevation data at 30m resolution.",
 
     link:
       "https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003"
@@ -67,7 +67,7 @@ const dataSources = [
       "https://developers.google.com/earth-engine/datasets/images/JRC/JRC_GSW1_4_GlobalSurfaceWater_sample.png",
 
     description:
-      "Global satellite-derived dataset that maps the location, extent, and seasonal changes of surface water using Landsat imagery.",
+      "JRC is a global satellite-derived dataset that maps the location, extent, and seasonal changes of surface water using Landsat imagery.",
 
     link:
       "https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater"
