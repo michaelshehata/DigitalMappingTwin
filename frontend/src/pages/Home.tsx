@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Home.css";
+import MainGlobe from "../components/MainGlobe";
 
 function Home() {
   const [videoOk, setVideoOk] = useState(true);
@@ -24,7 +25,10 @@ function Home() {
 
       <div className="container">
         <h1>Digital <div className="mappingHighlight">Mapping</div> Twin</h1>
+        
         <h3>A digital twin for mapping land use in <strong>Norwich </strong>over the next century!</h3>
+
+        <MainGlobe />
       </div>
     </main>
   );

@@ -55,7 +55,7 @@ const dataSources = [
       "https://developers.google.com/earth-engine/datasets/images/USGS/USGS_SRTMGL1_003_sample.png",
 
     description:
-      "add.",
+      "Global digital elevation model produced from NASA’s SRTM. It provides near global elevation data at 30m resolution.",
 
     link:
       "https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003"
@@ -67,7 +67,7 @@ const dataSources = [
       "https://developers.google.com/earth-engine/datasets/images/JRC/JRC_GSW1_4_GlobalSurfaceWater_sample.png",
 
     description:
-      "add.",
+      "Global satellite-derived dataset that maps the location, extent, and seasonal changes of surface water using Landsat imagery.",
 
     link:
       "https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater"
