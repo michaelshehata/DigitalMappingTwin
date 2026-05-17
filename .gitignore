@@ -18,3 +18,13 @@ node_modules/
 *__pycache__/
 
 *.geojson
+
+*.dbf
+
+*.shx
+
+*.shp
+
+*.tif
+
+*.png
