@@ -1,35 +1,55 @@
 import { useState } from "react";
+import axios from "axios";
 
-import GlobeView from "../components/GlobeView";
+import GlobeView from "../components/MapView";
 
 import "./Visualization.css";
 
 function Visualization() {
 
-  const [urbanExpansion, setUrbanExpansion] =
-    useState(50);
+  const [threshold, setThreshold] =
+    useState(0.35);
 
-  const [temperatureIncrease, setTemperatureIncrease] =
-    useState(2);
+  const [steps, setSteps] =
+    useState(10);
 
-  const [populationGrowth, setPopulationGrowth] =
-    useState(35);
-
-  const [simulationYear, setSimulationYear] =
-    useState(2050);
-
-  const [showPredictions, setShowPredictions] =
+  const [showProbability, setShowProbability] =
     useState(true);
 
-  // DYNAMIC ANALYTICS
-  const vegetationLoss =
-    Math.round(urbanExpansion * 0.65);
+  const [showBinary, setShowBinary] =
+    useState(true);
 
-  const floodRisk =
-    Math.round(temperatureIncrease * 14);
+  const [showNDVI, setShowNDVI] =
+    useState(false);
 
-  const urbanGrowth =
-    urbanExpansion;
+  const [loading, setLoading] =
+    useState(false);
+
+  const [analytics, setAnalytics] =
+    useState<any>(null);
+
+  const runSimulation = async () => {
+
+    try {
+
+      setLoading(true);
+
+      const response = await axios.post(
+        `http://127.0.0.1:8000/predict?threshold=${threshold}&steps=${steps}`
+      );
+
+      setAnalytics(response.data);
+
+    } catch (error) {
+
+      console.error(error);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
 
   return (
     <div className="visualization-page">
@@ -45,80 +65,45 @@ function Visualization() {
           </h2>
 
           <div className="slider-group">
+
             <label>
-              Urban Expansion: {urbanExpansion}%
-              
+              Threshold: {threshold.toFixed(2)}
             </label>
 
             <input
               type="range"
-              min="0"
-              max="100"
-              value={urbanExpansion}
+              min="0.1"
+              max="0.9"
+              step="0.01"
+              value={threshold}
               onChange={(e) =>
-                setUrbanExpansion(
+                setThreshold(
                   Number(e.target.value)
                 )
               }
             />
+
           </div>
 
           <div className="slider-group">
+
             <label>
-              Temperature Increase: {temperatureIncrease}°C
-              
+              Forecast Steps: {steps}
             </label>
 
             <input
               type="range"
-              min="0"
-              max="6"
-              step="0.1"
-              value={temperatureIncrease}
+              min="1"
+              max="30"
+              step="1"
+              value={steps}
               onChange={(e) =>
-                setTemperatureIncrease(
+                setSteps(
                   Number(e.target.value)
                 )
               }
             />
-          </div>
 
-          <div className="slider-group">
-            <label>
-              Population Growth: {populationGrowth}%
-              
-            </label>
-
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={populationGrowth}
-              onChange={(e) =>
-                setPopulationGrowth(
-                  Number(e.target.value)
-                )
-              }
-            />
-          </div>
-
-          <div className="slider-group">
-            <label>
-              Simulation Year: {simulationYear}
-              
-            </label>
-
-            <input
-              type="range"
-              min="2025"
-              max="2125"
-              value={simulationYear}
-              onChange={(e) =>
-                setSimulationYear(
-                  Number(e.target.value)
-                )
-              }
-            />
           </div>
 
           <div className="prediction-toggle">
@@ -127,9 +112,9 @@ function Visualization() {
 
               <input
                 type="checkbox"
-                checked={showPredictions}
+                checked={showProbability}
                 onChange={(e) =>
-                  setShowPredictions(
+                  setShowProbability(
                     e.target.checked
                   )
                 }
@@ -139,14 +124,69 @@ function Visualization() {
 
             </label>
 
-              <p className="predictionText">
-                Show Prediction Layer
-              </p>
+            <p className="predictionText">
+              Probability Layer
+            </p>
 
           </div>
 
-          <button className="run-button">
-            Run Simulation
+          <div className="prediction-toggle">
+
+            <label className="prediction-switch">
+
+              <input
+                type="checkbox"
+                checked={showBinary}
+                onChange={(e) =>
+                  setShowBinary(
+                    e.target.checked
+                  )
+                }
+              />
+
+              <span className="slider"></span>
+
+            </label>
+
+            <p className="predictionText">
+              Binary Prediction
+            </p>
+
+          </div>
+
+          <div className="prediction-toggle">
+
+            <label className="prediction-switch">
+
+              <input
+                type="checkbox"
+                checked={showNDVI}
+                onChange={(e) =>
+                  setShowNDVI(
+                    e.target.checked
+                  )
+                }
+              />
+
+              <span className="slider"></span>
+
+            </label>
+
+            <p className="predictionText">
+              NDVI Layer
+            </p>
+
+          </div>
+
+          <button
+            className="run-button"
+            onClick={runSimulation}
+          >
+            {
+              loading
+                ? "Running..."
+                : "Run Simulation"
+            }
           </button>
 
         </div>
@@ -156,9 +196,9 @@ function Visualization() {
         <div className="globe-panel">
 
           <GlobeView
-            showPredictions={
-              showPredictions
-            }
+            showProbability={showProbability}
+            showBinary={showBinary}
+            showNDVI={showNDVI}
           />
 
         </div>
@@ -171,49 +211,61 @@ function Visualization() {
             Simulation Analytics
           </h2>
 
-          <div className="stat-card">
-            <h3>
-              Urban Growth
-            </h3>
+          {
+            analytics && (
+              <>
 
-            <p>
-              {urbanGrowth}% predicted
-              expansion
-            </p>
-          </div>
+                <div className="stat-card">
+                  <h3>
+                    Predicted Change
+                  </h3>
 
-          <div className="stat-card">
-            <h3>
-              Flood Risk
-            </h3>
+                  <p>
+                    {
+                      analytics.predicted_change_percentage
+                    }%
+                  </p>
+                </div>
 
-            <p>
-              {floodRisk}% estimated
-              flood vulnerability
-            </p>
-          </div>
+                <div className="stat-card">
+                  <h3>
+                    Changed Pixels
+                  </h3>
 
-          <div className="stat-card">
-            <h3>
-              Vegetation Loss
-            </h3>
+                  <p>
+                    {
+                      analytics.predicted_change_pixels
+                    }
+                  </p>
+                </div>
 
-            <p>
-              {vegetationLoss}% potential
-              reduction
-            </p>
-          </div>
+                <div className="stat-card">
+                  <h3>
+                    Probability Mean
+                  </h3>
 
-          <div className="stat-card">
-            <h3>
-              Simulation Year
-            </h3>
+                  <p>
+                    {
+                      analytics.probability_mean.toFixed(3)
+                    }
+                  </p>
+                </div>
 
-            <p>
-              Forecast model for {simulationYear}
-              
-            </p>
-          </div>
+                <div className="stat-card">
+                  <h3>
+                    Probability Std
+                  </h3>
+
+                  <p>
+                    {
+                      analytics.probability_std.toFixed(3)
+                    }
+                  </p>
+                </div>
+
+              </>
+            )
+          }
 
         </div>
 

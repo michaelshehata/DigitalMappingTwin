@@ -1,48 +1,24 @@
-# API ENTRY POINT
-
 from fastapi import FastAPI
-import joblib
-import numpy as np
+from fastapi.middleware.cors import CORSMiddleware
 
-from scripts.load_data import load_all_data
-from api.weather_api import get_live_weather
-from api.rasterize_live import inject_live_data
+from api.routes.predict import router as predict_router
 
-app = FastAPI()
+app = FastAPI(
+    title="Digital Twin API"
+)
 
-model = joblib.load("model_output/random_forest.pkl")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+app.include_router(predict_router)
 
 @app.get("/")
 def root():
-    return {"message": "Digital Twin API running"}
-
-
-@app.get("/predict_live")
-def predict_live():
-
-    X, y, _ = load_all_data()
-
-    # Get live weather
-    weather = get_live_weather()
-
-    # Inject into dataset
-    X_live = inject_live_data(X, weather)
-
-    # Flatten
-    X_flat = X_live.reshape(-1, X_live.shape[-1])
-
-    # Chunk prediction
-    preds = []
-    for i in range(0, len(X_flat), 100000):
-        chunk = X_flat[i:i+100000]
-        prob = model.predict_proba(chunk)[:, 1]
-        preds.append((prob > 0.3).astype(int))
-
-    preds = np.concatenate(preds)
-
     return {
-        "status": "success",
-        "temperature": weather["temperature"],
-        "predicted_change_pixels": int(preds.sum())
+        "message": "Digital Twin API Running"
     }
