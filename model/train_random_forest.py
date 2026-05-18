@@ -17,6 +17,16 @@ from scripts.load_data import load_all_data
 
 np.random.seed(6001)
 
+
+# EXPERIMENT NAME
+experiment_name = "RF-1"
+
+
+# OUTPUT DIRECTORY
+output_dir = "model_output/hyperparameter_tuning/random_forest"
+
+os.makedirs(output_dir, exist_ok=True)
+
 X, y, _ = load_all_data()
 
 X_flat = X.reshape(-1, X.shape[-1])
@@ -56,7 +66,7 @@ print(f"\nTrain: {X_train.shape}, Val: {X_val.shape}, Test: {X_test.shape}")
 
 model = RandomForestClassifier(
     n_estimators=150,
-    max_depth=30,
+    max_depth=20,
     n_jobs=-1,
     random_state=6001,
     class_weight={0: 1, 1: 5}
@@ -93,37 +103,62 @@ precision, recall, _ = precision_recall_curve(y_test, y_test_prob)
 pr_auc = auc(recall, precision)
 
 tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+
 sensitivity = tp / (tp + fn)
 specificity = tn / (tn + fp)
+
+precision_score = tp / (tp + fp) if (tp + fp) > 0 else 0
 
 print(f"\nValidation AUROC: {val_auc:.4f}")
 print(f"\nTest Metrics:")
 print(f"  AUROC: {test_auc:.4f}")
 print(f"  PR-AUC: {pr_auc:.4f}")
 print(f"  F1-Score: {test_f1:.4f}")
-print(f"  Sensitivity: {sensitivity:.4f}")
+print(f"  Precision: {precision_score:.4f}")
+print(f"  Recall: {sensitivity:.4f}")
 print(f"  Specificity: {specificity:.4f}")
+
 print(f"\nClassification Report:")
 print(classification_report(y_test, y_test_pred))
 
-os.makedirs("model_output", exist_ok=True)
-joblib.dump(model, "model_output/random_forest.pkl")
+joblib.dump(
+    model,
+    os.path.join(output_dir, f"{experiment_name}.pkl")
+)
 
 metrics = {
+    "experiment_name": experiment_name,
     "model": "random_forest",
+
     "optimal_threshold": float(best_threshold),
+
     "val_auroc": float(val_auc),
+
     "test_auroc": float(test_auc),
     "test_pr_auc": float(pr_auc),
     "test_f1": float(test_f1),
-    "test_sensitivity": float(sensitivity),
+
+    "test_precision": float(precision_score),
+    "test_recall": float(sensitivity),
     "test_specificity": float(specificity),
+
+    "true_negatives": int(tn),
+    "false_positives": int(fp),
+    "false_negatives": int(fn),
+    "true_positives": int(tp),
+
+    "n_estimators": model.get_params().get("n_estimators"),
+    "max_depth": model.get_params().get("max_depth"),
+    "class_weight": str(model.get_params().get("class_weight")),
+
     "feature_names": feature_names,
     "feature_importance": model.feature_importances_.tolist()
 }
 
-with open("model_output/random_forest_metrics.json", "w") as f:
+with open(
+    os.path.join(output_dir, f"{experiment_name}_metrics.json"),
+    "w"
+) as f:
     json.dump(metrics, f, indent=2)
 
 print("\nTraining complete, models saved")
-
