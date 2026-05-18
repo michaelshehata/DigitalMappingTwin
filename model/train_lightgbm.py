@@ -3,11 +3,6 @@ import joblib
 import json
 import os
 
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import (
-    classification_report, f1_score, roc_auc_score,
-    precision_recall_curve, auc, confusion_matrix
-)
 import lightgbm as lgb
 
 import sys
@@ -18,154 +13,116 @@ from scripts.load_data import load_all_data
 np.random.seed(6001)
 
 
-# EXPERIMENT NAME
-experiment_name = "LGBM-3"
+# FINAL DEPLOYMENT MODEL CONFIG
+model_name = "final_lgbm"
 
-
-# OUTPUT DIRECTORY
-output_dir = "model_output/hyperparameter_tuning/lightgbm"
+output_dir = "model_output/deployment"
 
 os.makedirs(output_dir, exist_ok=True)
+
+
+# LOAD DATA
+print("Loading full dataset...")
 
 X, y, _ = load_all_data()
 
 X_flat = X.reshape(-1, X.shape[-1])
 y_flat = y.flatten()
 
+# Remove invalid pixels
 mask = (y_flat >= 0)
+
 X_flat = X_flat[mask]
 y_flat = y_flat[mask]
 
-feature_names = ["NDVI", "Population", "Temperature", "Elevation", "Distance_to_Water", "Landcover"]
+feature_names = [
+    "NDVI",
+    "Population",
+    "Temperature",
+    "Elevation",
+    "Distance_to_Water",
+    "Landcover"
+]
 
-print("Dataset shape:", X_flat.shape)
-print("Features:", feature_names)
-print("Class distribution:")
+print(f"\nDataset Shape: {X_flat.shape}")
+
+
+# CLASS DISTRIBUTION
 unique, counts = np.unique(y_flat, return_counts=True)
+
+print("\nClass Distribution:")
+
 for u, c in zip(unique, counts):
     print(f"  Class {u}: {c}")
 
-sample_size = min(50000, len(X_flat))
-indices = np.random.choice(len(X_flat), sample_size, replace=False)
-X_sample = X_flat[indices]
-y_sample = y_flat[indices]
 
-X_train, X_temp, y_train, y_temp = train_test_split(
-    X_sample, y_sample, test_size=0.3, stratify=y_sample, random_state=6001
-)
-
-X_val, X_test, y_val, y_test = train_test_split(
-    X_temp, y_temp, test_size=2/3, stratify=y_temp, random_state=6001
-)
-
-assert abs(X_train.shape[0] / len(X_sample) - 0.7) < 0.01
-assert abs(X_val.shape[0] / len(X_sample) - 0.1) < 0.01
-assert abs(X_test.shape[0] / len(X_sample) - 0.2) < 0.01
-
-print(f"\nTrain: {X_train.shape}, Val: {X_val.shape}, Test: {X_test.shape}")
-
-scale_pos_weight = len(y_train[y_train == 0]) / len(y_train[y_train == 1])
+# FINAL MODEL
+print("\nInitializing LightGBM...")
 
 model = lgb.LGBMClassifier(
-    n_estimators=200,
-    num_leaves=15,
-    learning_rate=0.1,
-    scale_pos_weight=8,
+    n_estimators=400,
+    num_leaves=63,
+    learning_rate=0.03,
+    scale_pos_weight=12,
     subsample=0.8,
     colsample_bytree=0.8,
     n_jobs=-1,
     random_state=6001
 )
 
-print("\nTraining LightGBM...")
-model.fit(X_train, y_train)
 
-y_val_prob = model.predict_proba(X_val)[:, 1]
-y_test_prob = model.predict_proba(X_test)[:, 1]
+# TRAIN FULL MODEL
 
-# Threshold optimization on validation set
-thresholds = np.arange(0.1, 0.9, 0.05)
-best_threshold = 0.5
-best_f1 = 0
+print(f"Training pixels: {len(X_flat):,}")
 
-for thresh in thresholds:
-    y_val_pred_temp = (y_val_prob > thresh).astype(int)
-    f1_temp = f1_score(y_val, y_val_pred_temp)
-    if f1_temp > best_f1:
-        best_f1 = f1_temp
-        best_threshold = thresh
+model.fit(X_flat, y_flat)
 
-print(f"Optimal threshold (validation F1): {best_threshold:.2f}")
+print("\nTraining complete")
 
-y_val_pred = (y_val_prob > best_threshold).astype(int)
-y_test_pred = (y_test_prob > best_threshold).astype(int)
+# SAVE MODEL
+model_path = os.path.join(output_dir, f"{model_name}.pkl")
 
-val_auc = roc_auc_score(y_val, y_val_prob)
-test_auc = roc_auc_score(y_test, y_test_prob)
-test_f1 = f1_score(y_test, y_test_pred)
+joblib.dump(model, model_path)
 
-precision, recall, _ = precision_recall_curve(y_test, y_test_prob)
-pr_auc = auc(recall, precision)
+print(f"\nModel saved:")
+print(model_path)
 
-tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
 
-sensitivity = tp / (tp + fn)
-specificity = tn / (tn + fp)
+# SAVE METADATA
+metadata = {
 
-precision_score = tp / (tp + fp) if (tp + fp) > 0 else 0
+    "model_name": model_name,
 
-print(f"\nValidation AUROC: {val_auc:.4f}")
-print(f"\nTest Metrics:")
-print(f"  AUROC: {test_auc:.4f}")
-print(f"  PR-AUC: {pr_auc:.4f}")
-print(f"  F1-Score: {test_f1:.4f}")
-print(f"  Precision: {precision_score:.4f}")
-print(f"  Recall: {sensitivity:.4f}")
-print(f"  Specificity: {specificity:.4f}")
+    "model_type": "LightGBM",
 
-print(f"\nClassification Report:")
-print(classification_report(y_test, y_test_pred))
+    "features": feature_names,
 
-joblib.dump(
-    model,
-    os.path.join(output_dir, f"{experiment_name}.pkl")
-)
+    # Best threshold from evaluation experiments
+    "optimal_threshold": 0.35,
 
-metrics = {
-    "experiment_name": experiment_name,
-    "model": "lightgbm",
+    "hyperparameters": {
 
-    "optimal_threshold": float(best_threshold),
+        "n_estimators": 400,
+        "num_leaves": 63,
+        "learning_rate": 0.03,
+        "scale_pos_weight": 12,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "random_state": 6001
+    },
 
-    "val_auroc": float(val_auc),
-
-    "test_auroc": float(test_auc),
-    "test_pr_auc": float(pr_auc),
-    "test_f1": float(test_f1),
-
-    "test_precision": float(precision_score),
-    "test_recall": float(sensitivity),
-    "test_specificity": float(specificity),
-
-    "true_negatives": int(tn),
-    "false_positives": int(fp),
-    "false_negatives": int(fn),
-    "true_positives": int(tp),
-
-    "n_estimators": model.get_params().get("n_estimators"),
-    "max_depth": model.get_params().get("max_depth"),
-    "learning_rate": model.get_params().get("learning_rate"),
-    "num_leaves": model.get_params().get("num_leaves"),
-    "scale_pos_weight": model.get_params().get("scale_pos_weight"),
-
-    "feature_names": feature_names,
     "feature_importance": model.feature_importances_.tolist()
 }
 
-with open(
-    os.path.join(output_dir, f"{experiment_name}_metrics.json"),
-    "w"
-) as f:
-    json.dump(metrics, f, indent=2)
+metadata_path = os.path.join(
+    output_dir,
+    f"{model_name}_metadata.json"
+)
 
-print("\nTraining complete, models saved")
+with open(metadata_path, "w") as f:
+    json.dump(metadata, f, indent=2)
+
+print("\nMetadata saved:")
+print(metadata_path)
+
+print("\nFINAL DEPLOYMENT MODEL READY")

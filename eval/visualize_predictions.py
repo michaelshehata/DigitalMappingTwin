@@ -9,6 +9,8 @@ sys.path.insert(0, "..")
 
 from scripts.load_data import load_all_data
 
+
+# LOAD RESULTS
 results = pd.read_csv("model_output/experiment_results.csv")
 
 best_model = results.sort_values(
@@ -27,6 +29,8 @@ print("=" * 80)
 print(f"Experiment: {experiment_name}")
 print(f"Model Type: {model_type}")
 
+
+# LOAD MODEL
 model_path = (
     f"model_output/hyperparameter_tuning/"
     f"{model_type}/"
@@ -35,10 +39,14 @@ model_path = (
 
 model = joblib.load(model_path)
 
+
+# LOAD DATA
 X, y, _ = load_all_data()
 
 X_flat = X.reshape(-1, X.shape[-1])
 
+
+# PREDICTIONS
 chunk_size = 100000
 
 preds = []
@@ -67,10 +75,16 @@ change_pct = 100 * np.sum(pred_map) / pred_map.size
 
 print(f"Predicted Change Pixels: {change_pct:.2f}%")
 
-os.makedirs("eval_outputs/maps", exist_ok=True)
 
+# OUTPUT DIR
+os.makedirs("outputs/eval/maps", exist_ok=True)
+
+
+# PLOT FIGURES
 fig, axes = plt.subplots(1, 3, figsize=(18, 6))
 
+
+# ACTUAL MAP
 im1 = axes[0].imshow(
     y[-1],
     cmap="RdYlBu_r",
@@ -79,7 +93,7 @@ im1 = axes[0].imshow(
 )
 
 axes[0].set_title(
-    "Actual Change",
+    "Actual Change Map",
     fontweight="bold"
 )
 
@@ -87,6 +101,7 @@ axes[0].axis("off")
 
 plt.colorbar(im1, ax=axes[0])
 
+# PREDICTED MAP
 im2 = axes[1].imshow(
     pred_map[-1],
     cmap="RdYlBu_r",
@@ -95,7 +110,7 @@ im2 = axes[1].imshow(
 )
 
 axes[1].set_title(
-    f"Predicted Change\n{change_pct:.2f}% Pixels",
+    f"{experiment_name}\nPredicted Change Map",
     fontweight="bold"
 )
 
@@ -103,6 +118,8 @@ axes[1].axis("off")
 
 plt.colorbar(im2, ax=axes[1])
 
+
+# PROBABILITY MAP
 im3 = axes[2].imshow(
     prob_map[-1],
     cmap="viridis",
@@ -111,7 +128,7 @@ im3 = axes[2].imshow(
 )
 
 axes[2].set_title(
-    "Prediction Probability",
+    f"{experiment_name}\nProbability Map",
     fontweight="bold"
 )
 
@@ -119,21 +136,23 @@ axes[2].axis("off")
 
 plt.colorbar(im3, ax=axes[2])
 
+
+# SAVE
 plt.suptitle(
     f"Spatial Prediction Results — {experiment_name}",
-    fontsize=18,
+    fontsize=16,
     fontweight="bold"
 )
 
 plt.tight_layout()
 
 plt.savefig(
-    "eval_outputs/maps/best_model_predictions.png",
+    "outputs/eval/maps/best_model_predictions.png",
     dpi=300,
     bbox_inches="tight"
 )
 
 print(
     "\nSaved to "
-    "eval_outputs/maps/best_model_predictions.png"
+    "outputs/eval/maps/best_model_predictions.png"
 )
