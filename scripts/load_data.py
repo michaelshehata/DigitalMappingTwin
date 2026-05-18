@@ -301,10 +301,11 @@ def load_all_data(years=None):
             lc_arr,
             lc_profile,
             ref_profile,
-            method="bilinear"
+            method="nearest"
         )
 
         lc_arr = clean_generic(lc_arr)
+
 
         landcover_data[year] = lc_arr
 
@@ -324,18 +325,20 @@ def load_all_data(years=None):
             ref_profile
         )
 
+        lc_t1 = landcover_data[y1]
+        lc_t2 = landcover_data[y2]
+
+        lc_t1_feature = np.mean(lc_t1, axis=2) if lc_t1.ndim == 3 else lc_t1
+
         # FEATURE STACK
         X = np.stack([
             ndvi_t1,
             pop_t1,
             temp_t1,
             elevation,
-            water
+            water,
+            lc_t1_feature
         ], axis=-1)
-
-        # LANDCOVER CHANGE
-        lc_t1 = landcover_data[y1]
-        lc_t2 = landcover_data[y2]
 
         spectral_change = compute_spectral_change(
             lc_t1,
@@ -373,6 +376,7 @@ def load_all_data(years=None):
     print(f"  Temp: [{X_final[..., 2].min():.3f}, {X_final[..., 2].max():.3f}]")
     print(f"  Elev: [{X_final[..., 3].min():.3f}, {X_final[..., 3].max():.3f}]")
     print(f"  Water:[{X_final[..., 4].min():.3f}, {X_final[..., 4].max():.3f}]")
+    print(f"  LC:   [{X_final[..., 5].min():.3f}, {X_final[..., 5].max():.3f}]")
 
     unique, counts = np.unique(y_final, return_counts=True)
 

@@ -7,10 +7,10 @@ const dataSources = [
       "https://developers.google.com/earth-engine/datasets/images/GOOGLE/GOOGLE_DYNAMICWORLD_V1_sample.png",
 
     description:
-      "Dynamic World is a 10m land cover dataset that includes class probabilities and label information for nine classes.",
+      "Landsat Collection 2 Level 2 provides multispectral satellite imagery used to generate land cover and land-use visualisations across multiple decades for environmental and urban change analysis.",
 
     link:
-      "https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_DYNAMICWORLD_V1"
+      "https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2"
   },
 
   {
@@ -19,7 +19,7 @@ const dataSources = [
       "https://developers.google.com/earth-engine/datasets/images/ECMWF/ECMWF_ERA5_LAND_MONTHLY_AGGR_sample.png",
 
     description:
-      "ERA5-Land is a reanalysis dataset providing a consistent view of the evolution of land variables over several decades at an enhanced resolution.",
+      "ERA5-Land is a climate reanalysis dataset providing long-term temperature and atmospheric variables at high temporal resolution for environmental monitoring and climate assessment.",
 
     link:
       "https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_LAND_MONTHLY_AGGR"
@@ -31,7 +31,7 @@ const dataSources = [
       "https://miro.medium.com/v2/resize:fit:1100/format:webp/1*j-cTRXVuaJT2tjJQk5fD6A.png",
 
     description:
-      "Worldpop provides high-resolution global population estimates at 100 m resolution.",
+      "WorldPop provides high-resolution gridded population estimates at 100 m spatial resolution for analysing population distribution and urban growth patterns.",
 
     link:
       "https://developers.google.com/earth-engine/datasets/catalog/WorldPop_GP_100m_pop"
@@ -43,16 +43,16 @@ const dataSources = [
       "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2020/05/southern_ukraine/21988511-1-eng-GB/Southern_Ukraine.jpg",
 
     description:
-      "Sentinel-2 is a satellite mission that provides high-resolution optical imagery for land cover classification maps for environmental and urban planning analysis.",
+      "NDVI derived from Landsat imagery is used to measure vegetation density and health by analysing differences between near-infrared and red spectral bands.",
 
     link:
-      "https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED"
+      "https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2"
   },
 
   {
     title: "Elevation",
     image:
-      "https://www.researchgate.net/publication/237707716/figure/fig2/AS:298948293087236@1448286235339/Digital-elevation-model-DTED2-of-the-study-area-Height-of-the-scale-bar-expressed-in.png",
+      "https://i.ibb.co/b5HB3nSZ/elevation.png",
 
     description:
       "SRTM is a global digital elevation model produced by NASA. It provides near global elevation data at 30m resolution.",

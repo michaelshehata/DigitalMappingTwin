@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(".."))
 
 from scripts.load_data import load_all_data
 
-np.random.seed(42)
+np.random.seed(6001)
 
 X, y, _ = load_all_data()
 
@@ -26,7 +26,7 @@ mask = (y_flat >= 0)
 X_flat = X_flat[mask]
 y_flat = y_flat[mask]
 
-feature_names = ["NDVI", "Population", "Temperature", "Elevation", "Distance_to_Water"]
+feature_names = ["NDVI", "Population", "Temperature", "Elevation", "Distance_to_Water", "Landcover"]
 
 print("Dataset shape:", X_flat.shape)
 print("Features:", feature_names)
@@ -35,18 +35,22 @@ unique, counts = np.unique(y_flat, return_counts=True)
 for u, c in zip(unique, counts):
     print(f"  Class {u}: {c}")
 
-sample_size = 200000
+sample_size = min(50000, len(X_flat))
 indices = np.random.choice(len(X_flat), sample_size, replace=False)
 X_sample = X_flat[indices]
 y_sample = y_flat[indices]
 
 X_train, X_temp, y_train, y_temp = train_test_split(
-    X_sample, y_sample, test_size=0.3, stratify=y_sample, random_state=42
+    X_sample, y_sample, test_size=0.3, stratify=y_sample, random_state=6001
 )
 
 X_val, X_test, y_val, y_test = train_test_split(
-    X_temp, y_temp, test_size=2/3, stratify=y_temp, random_state=42
+    X_temp, y_temp, test_size=2/3, stratify=y_temp, random_state=6001
 )
+
+assert abs(X_train.shape[0] / len(X_sample) - 0.7) < 0.01
+assert abs(X_val.shape[0] / len(X_sample) - 0.1) < 0.01
+assert abs(X_test.shape[0] / len(X_sample) - 0.2) < 0.01
 
 print(f"\nTrain: {X_train.shape}, Val: {X_val.shape}, Test: {X_test.shape}")
 
@@ -54,7 +58,7 @@ model = RandomForestClassifier(
     n_estimators=150,
     max_depth=30,
     n_jobs=-1,
-    random_state=42,
+    random_state=6001,
     class_weight={0: 1, 1: 5}
 )
 
@@ -121,5 +125,5 @@ metrics = {
 with open("model_output/random_forest_metrics.json", "w") as f:
     json.dump(metrics, f, indent=2)
 
-print("\nModel and metrics saved to model_output/")
+print("\nTraining complete, models saved")
 

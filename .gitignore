@@ -28,3 +28,7 @@ node_modules/
 *.tif
 
 *.png
+
+*.ttf 
+
+*.otf
