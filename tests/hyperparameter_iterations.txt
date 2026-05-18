@@ -2,7 +2,7 @@ HYPERPARAMETER TEST ITERATIONS:
 
 -- RF-1 (Balanced Baseline):
 
-RandomForestClassifier(
+model = RandomForestClassifier(
     n_estimators=150,
     max_depth=20,
     class_weight={0:1, 1:5},
@@ -12,7 +12,7 @@ RandomForestClassifier(
 
 -- RF-2 (Deeper Trees)
 
-RandomForestClassifier(
+model = RandomForestClassifier(
     n_estimators=200,
     max_depth=30,
     class_weight={0:1, 1:7},
@@ -22,7 +22,7 @@ RandomForestClassifier(
 
 -- RF-3 (More Conservative)
 
-RandomForestClassifier(
+model = RandomForestClassifier(
     n_estimators=300,
     max_depth=15,
     class_weight="balanced",
@@ -42,7 +42,7 @@ RF-3	generalisation + less overfitting
 
 XGB-1 (Safe Baseline)
 
-XGBClassifier(
+model = XGBClassifier(
     n_estimators=300,
     max_depth=6,
     learning_rate=0.05,
@@ -56,7 +56,7 @@ XGBClassifier(
 
 XBG-2 (HIGHER COMPELXITY)
 
-XGBClassifier(
+model = XGBClassifier(
     n_estimators=400,
     max_depth=8,
     learning_rate=0.03,
@@ -70,7 +70,7 @@ XGBClassifier(
 
 XGB-3 (Faster + Regularised)
 
-XGBClassifier(
+model = XGBClassifier(
     n_estimators=200,
     max_depth=4,
     learning_rate=0.1,
@@ -91,7 +91,7 @@ XGB-3	simplified regularised boosting
 
 LGBM-1 (Baseline)
 
-lgb.LGBMClassifier(
+model = lgb.LGBMClassifier(
     n_estimators=300,
     num_leaves=31,
     learning_rate=0.05,
@@ -106,7 +106,7 @@ lgb.LGBMClassifier(
 
 LGBM-2 (Higher Complexity)
 
-lgb.LGBMClassifier(
+model = lgb.LGBMClassifier(
     n_estimators=400,
     num_leaves=63,
     learning_rate=0.03,
@@ -121,7 +121,7 @@ lgb.LGBMClassifier(
 
 LGBM-3 (Regularised)
 
-lgb.LGBMClassifier(
+model = lgb.LGBMClassifier(
     n_estimators=200,
     num_leaves=15,
     learning_rate=0.1,

@@ -19,7 +19,7 @@ np.random.seed(6001)
 
 
 # EXPERIMENT NAME
-experiment_name = "RF-1"
+experiment_name = "RF-3"
 
 
 # OUTPUT DIRECTORY
@@ -65,11 +65,11 @@ assert abs(X_test.shape[0] / len(X_sample) - 0.2) < 0.01
 print(f"\nTrain: {X_train.shape}, Val: {X_val.shape}, Test: {X_test.shape}")
 
 model = RandomForestClassifier(
-    n_estimators=150,
-    max_depth=20,
+    n_estimators=300,
+    max_depth=15,
     n_jobs=-1,
     random_state=6001,
-    class_weight={0: 1, 1: 5}
+    class_weight="balanced"
 )
 
 print("\nTraining RandomForest...")

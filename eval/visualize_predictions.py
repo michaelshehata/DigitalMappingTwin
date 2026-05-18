@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import rasterio
 import joblib
-import json
+import pandas as pd
 import sys
 import os
 
@@ -10,94 +9,131 @@ sys.path.insert(0, "..")
 
 from scripts.load_data import load_all_data
 
-models_to_eval = ["random_forest", "xgboost", "lightgbm"]
+results = pd.read_csv("model_output/experiment_results.csv")
+
+best_model = results.sort_values(
+    "F1",
+    ascending=False
+).iloc[0]
+
+experiment_name = best_model["Experiment"]
+model_type = best_model["Model"]
+threshold = best_model["Threshold"]
+
+print("=" * 80)
+print("BEST MODEL SPATIAL VISUALISATION")
+print("=" * 80)
+
+print(f"Experiment: {experiment_name}")
+print(f"Model Type: {model_type}")
+
+model_path = (
+    f"model_output/hyperparameter_tuning/"
+    f"{model_type}/"
+    f"{experiment_name}.pkl"
+)
+
+model = joblib.load(model_path)
 
 X, y, _ = load_all_data()
 
 X_flat = X.reshape(-1, X.shape[-1])
 
-os.makedirs("outputs/eval", exist_ok=True)
+chunk_size = 100000
 
-print("="*70)
-print("SPATIAL PREDICTION VISUALIZATION")
-print("="*70)
+preds = []
+probs = []
 
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+print("\nGenerating predictions...")
 
-for idx, model_name in enumerate(models_to_eval):
-    try:
-        model = joblib.load(f"model_output/{model_name}.pkl")
+for i in range(0, len(X_flat), chunk_size):
 
-        # Load metrics to get optimal threshold
-        with open(f"model_output/{model_name}_metrics.json", "r") as f:
-            metrics = json.load(f)
-        optimal_threshold = metrics.get("optimal_threshold", 0.3)
+    chunk = X_flat[i:i + chunk_size]
 
-        print(f"\nGenerating prediction map for {model_name.upper()}...")
+    prob = model.predict_proba(chunk)[:, 1]
 
-        chunk_size = 100000
-        preds = []
-        probs = []
+    pred = (prob > threshold).astype(int)
 
-        for i in range(0, len(X_flat), chunk_size):
-            chunk = X_flat[i:i + chunk_size]
-            prob = model.predict_proba(chunk)[:, 1]
-            probs.append(prob)
-            pred = (prob > optimal_threshold).astype(int)
-            preds.append(pred)
+    preds.append(pred)
+    probs.append(prob)
 
-        preds = np.concatenate(preds)
-        probs = np.concatenate(probs)
+preds = np.concatenate(preds)
+probs = np.concatenate(probs)
 
-        pred_map = preds.reshape(y.shape)
-        prob_map = probs.reshape(y.shape)
+pred_map = preds.reshape(y.shape)
+prob_map = probs.reshape(y.shape)
 
-        # Plot actual on first row
-        if idx == 0:
-            ax_actual = axes[0, 0]
-            im = ax_actual.imshow(y, cmap="RdYlBu_r", vmin=0, vmax=1)
-            ax_actual.set_title("Actual Change Map", fontweight='bold')
-            ax_actual.axis('off')
-            plt.colorbar(im, ax=ax_actual)
+change_pct = 100 * np.sum(pred_map) / pred_map.size
 
-        # Plot predictions on first row (idx+1 because idx=0 has actual)
-        ax_pred = axes[0, idx + 1] if idx == 0 else axes[0, idx]
+print(f"Predicted Change Pixels: {change_pct:.2f}%")
 
-        # Plot probability maps on second row
-        ax_prob = axes[1, idx]
+os.makedirs("eval_outputs/maps", exist_ok=True)
 
-        im_pred = ax_pred.imshow(pred_map, cmap="RdYlBu_r", vmin=0, vmax=1)
-        ax_pred.set_title(f"{model_name.upper()}\nPredictions (threshold={optimal_threshold:.2f})", fontweight='bold')
-        ax_pred.axis('off')
-        plt.colorbar(im_pred, ax=ax_pred)
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))
 
-        im_prob = ax_prob.imshow(prob_map, cmap="viridis", vmin=0, vmax=1)
-        ax_prob.set_title(f"{model_name.upper()}\nProbability Map", fontweight='bold')
-        ax_prob.axis('off')
-        plt.colorbar(im_prob, ax=ax_prob)
+im1 = axes[0].imshow(
+    y[-1],
+    cmap="RdYlBu_r",
+    vmin=0,
+    vmax=1
+)
 
-        change_pct = 100 * np.sum(pred_map) / pred_map.size
-        print(f"  Change pixels: {np.sum(pred_map):,} / {pred_map.size:,} ({change_pct:.2f}%)")
+axes[0].set_title(
+    "Actual Change",
+    fontweight="bold"
+)
 
-    except FileNotFoundError:
-        print(f"\nGenerating prediction map for {model_name.upper()}: Model file not found (placeholder)")
-        ax_pred = axes[0, idx + 1] if idx == 0 else axes[0, idx]
-        ax_prob = axes[1, idx]
+axes[0].axis("off")
 
-        ax_pred.text(0.5, 0.5, f"{model_name}\n(Not trained yet)",
-                    ha='center', va='center', transform=ax_pred.transAxes)
-        ax_prob.text(0.5, 0.5, f"{model_name}\n(Not trained yet)",
-                    ha='center', va='center', transform=ax_prob.transAxes)
-        ax_pred.axis('off')
-        ax_prob.axis('off')
+plt.colorbar(im1, ax=axes[0])
 
-# Remove the extra subplot if it exists
-try:
-    fig.delaxes(axes[0, 3])
-except:
-    pass
+im2 = axes[1].imshow(
+    pred_map[-1],
+    cmap="RdYlBu_r",
+    vmin=0,
+    vmax=1
+)
 
-plt.suptitle("Spatial Prediction and Probability Maps", fontsize=14, fontweight='bold', y=0.98)
+axes[1].set_title(
+    f"Predicted Change\n{change_pct:.2f}% Pixels",
+    fontweight="bold"
+)
+
+axes[1].axis("off")
+
+plt.colorbar(im2, ax=axes[1])
+
+im3 = axes[2].imshow(
+    prob_map[-1],
+    cmap="viridis",
+    vmin=0,
+    vmax=1
+)
+
+axes[2].set_title(
+    "Prediction Probability",
+    fontweight="bold"
+)
+
+axes[2].axis("off")
+
+plt.colorbar(im3, ax=axes[2])
+
+plt.suptitle(
+    f"Spatial Prediction Results — {experiment_name}",
+    fontsize=18,
+    fontweight="bold"
+)
+
 plt.tight_layout()
-plt.savefig("outputs/eval/prediction_maps.png", dpi=150, bbox_inches='tight')
-print("\n\nPrediction maps saved to: outputs/eval/prediction_maps.png")
+
+plt.savefig(
+    "eval_outputs/maps/best_model_predictions.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+print(
+    "\nSaved to "
+    "eval_outputs/maps/best_model_predictions.png"
+)

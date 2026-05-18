@@ -1,60 +1,82 @@
 import json
 import matplotlib.pyplot as plt
 import numpy as np
-import sys
+import pandas as pd
 import os
 
-sys.path.insert(0, "..")
+results = pd.read_csv("model_output/experiment_results.csv")
 
-models_to_eval = ["random_forest", "xgboost", "lightgbm"]
+top_models = results.sort_values(
+    "F1",
+    ascending=False
+).head(3)
 
-print("="*70)
+os.makedirs("eval_outputs/plots", exist_ok=True)
+
 print("FEATURE IMPORTANCE ANALYSIS")
-print("="*70)
 
-importance_data = {}
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))
 
-for model_name in models_to_eval:
-    try:
-        with open(f"model_output/{model_name}_metrics.json", "r") as f:
-            metrics = json.load(f)
+for idx, (_, row) in enumerate(top_models.iterrows()):
 
-        importance_data[model_name] = {
-            "features": metrics["feature_names"],
-            "importance": metrics["feature_importance"]
-        }
-        print(f"\n{model_name.upper()}:")
-        for feat, imp in zip(metrics["feature_names"], metrics["feature_importance"]):
-            print(f"  {feat}: {imp:.4f}")
-    except FileNotFoundError:
-        print(f"\n{model_name.upper()}: Metrics file not found (placeholder)")
-        importance_data[model_name] = {
-            "features": ["NDVI", "Population", "Temperature", "Elevation", "Distance_to_Water"],
-            "importance": [0.0] * 5
-        }
+    experiment_name = row["Experiment"]
+    model_type = row["Model"]
 
-os.makedirs("outputs/eval", exist_ok=True)
+    metrics_path = (
+        f"model_output/hyperparameter_tuning/"
+        f"{model_type}/"
+        f"{experiment_name}_metrics.json"
+    )
 
-# Create comparison plots
-fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    print(f"\nLoading: {experiment_name}")
 
-for idx, (model_name, ax) in enumerate(zip(models_to_eval, axes)):
-    features = importance_data[model_name]["features"]
-    importance = importance_data[model_name]["importance"]
+    with open(metrics_path, "r") as f:
+        metrics = json.load(f)
+
+    features = np.array(metrics["feature_names"])
+    importance = np.array(metrics["feature_importance"])
+
+    importance = importance / np.sum(importance)
 
     sorted_idx = np.argsort(importance)
 
-    ax.barh(range(len(sorted_idx)), np.array(importance)[sorted_idx])
+    ax = axes[idx]
+
+    ax.barh(
+        range(len(sorted_idx)),
+        importance[sorted_idx]
+    )
+
     ax.set_yticks(range(len(sorted_idx)))
-    ax.set_yticklabels(np.array(features)[sorted_idx])
-    ax.set_xlabel("Importance")
-    ax.set_title(f"{model_name.upper()}\nFeature Importance")
-    ax.grid(axis='x', alpha=0.3)
+
+    ax.set_yticklabels(features[sorted_idx])
+
+    ax.set_xlim(0, 0.35)
+
+    ax.set_xlabel("Normalized Importance")
+
+    ax.set_title(
+        f"{experiment_name}\nFeature Importance",
+        fontweight="bold"
+    )
+
+    ax.grid(axis="x", alpha=0.3)
+
+plt.suptitle(
+    "Top 3 Model Feature Importance Comparison",
+    fontsize=18,
+    fontweight="bold"
+)
 
 plt.tight_layout()
-plt.savefig("outputs/eval/feature_importance_comparison.png", dpi=150, bbox_inches='tight')
-print("\n\nFeature importance comparison saved to: outputs/eval/feature_importance_comparison.png")
 
-with open("outputs/eval/feature_importance_summary.json", "w") as f:
-    json.dump(importance_data, f, indent=2)
-print("Summary saved to: outputs/eval/feature_importance_summary.json")
+plt.savefig(
+    "eval_outputs/plots/feature_importance_comparison.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+print(
+    "\nSaved to "
+    "eval_outputs/plots/feature_importance_comparison.png"
+)

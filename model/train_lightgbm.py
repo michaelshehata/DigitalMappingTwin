@@ -19,7 +19,7 @@ np.random.seed(6001)
 
 
 # EXPERIMENT NAME
-experiment_name = "LGBM-1"
+experiment_name = "LGBM-3"
 
 
 # OUTPUT DIRECTORY
@@ -67,15 +67,14 @@ print(f"\nTrain: {X_train.shape}, Val: {X_val.shape}, Test: {X_test.shape}")
 scale_pos_weight = len(y_train[y_train == 0]) / len(y_train[y_train == 1])
 
 model = lgb.LGBMClassifier(
-    n_estimators=300,
-    max_depth=8,
-    learning_rate=0.05,
+    n_estimators=200,
+    num_leaves=15,
+    learning_rate=0.1,
+    scale_pos_weight=8,
     subsample=0.8,
     colsample_bytree=0.8,
-    scale_pos_weight=scale_pos_weight,
     n_jobs=-1,
-    random_state=6001,
-    verbose=-1
+    random_state=6001
 )
 
 print("\nTraining LightGBM...")

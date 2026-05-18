@@ -129,9 +129,9 @@ for metric in ["F1", "Precision", "Recall", "PR-AUC", "AUROC"]:
 # OVERALL BEST MODEL
 best_model = df.iloc[0]
 
-print("\n" + "=" * 80)
+
 print("OVERALL BEST MODEL")
-print("=" * 80)
+
 
 print(f"\nExperiment: {best_model['Experiment']}")
 print(f"Model Type: {best_model['Model']}")
@@ -141,9 +141,9 @@ print(f"Recall:     {best_model['Recall']:.4f}")
 print(f"PR-AUC:     {best_model['PR-AUC']:.4f}")
 print(f"AUROC:      {best_model['AUROC']:.4f}")
 
-print("\n" + "=" * 80)
+
 print("CSV SAVED")
-print("=" * 80)
+
 
 print(f"\nSaved to:")
 print(OUTPUT_CSV)
