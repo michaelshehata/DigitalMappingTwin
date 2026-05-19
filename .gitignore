@@ -1,17 +1,18 @@
 .env
 
 .kaggle/
+
 kaggle.json
 
 data
 
 *.csv
+
 *.json
 
 node_modules/
 
 /.venv
-
 
 *.pkl
 
@@ -34,3 +35,5 @@ node_modules/
 *.otf
 
 *.xml
+
+*.npy

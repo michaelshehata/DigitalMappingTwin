@@ -142,8 +142,6 @@ print(f"PR-AUC:     {best_model['PR-AUC']:.4f}")
 print(f"AUROC:      {best_model['AUROC']:.4f}")
 
 
-print("CSV SAVED")
-
 
 print(f"\nSaved to:")
 print(OUTPUT_CSV)

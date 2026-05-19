@@ -3,8 +3,11 @@ import joblib
 import json
 import os
 
-from scripts.load_data import load_all_data
-from api.services.geojson import raster_to_geojson
+from live.load_live_data import load_live_data
+
+from api.services.geojson import (
+    raster_to_geojson
+)
 
 MODEL_PATH = (
     "model_output/deployment/final_lgbm.pkl"
@@ -15,6 +18,9 @@ METADATA_PATH = (
     "final_lgbm_metadata.json"
 )
 
+
+
+# LOAD MODEL
 model = joblib.load(MODEL_PATH)
 
 with open(METADATA_PATH) as f:
@@ -24,30 +30,39 @@ DEFAULT_THRESHOLD = metadata[
     "optimal_threshold"
 ]
 
+
+
+# MAIN PREDICTION FUNCTION
 def run_prediction(
+
     threshold=DEFAULT_THRESHOLD,
+
     steps=10
+
 ):
 
-    X, y, profile = load_all_data()
+    print("\nRUNNING LIVE INFERENCE")
+    print("=" * 50)
+
+
+
+    # LOAD LIVE FEATURE STACK
+    X_live, profile = load_live_data()
 
     height = profile["height"]
+
     width = profile["width"]
 
-    X_flat = X.reshape(
+
+    # FLATTEN FEATURES
+    X_flat = X_live.reshape(
         -1,
-        height,
-        width,
-        X.shape[-1]
+        X_live.shape[-1]
     )
 
-    X_flat = X_flat[0]
 
-    X_flat = X_flat.reshape(
-        -1,
-        X.shape[-1]
-    )
 
+    # MODEL INFERENCE
     probabilities = (
         model.predict_proba(X_flat)[:, 1]
     )
@@ -56,6 +71,9 @@ def run_prediction(
         probabilities > threshold
     ).astype(np.uint8)
 
+
+
+    # RESHAPE OUTPUTS
     probability_map = probabilities.reshape(
         height,
         width
@@ -66,13 +84,33 @@ def run_prediction(
         width
     )
 
-    geojson = raster_to_geojson(
-        binary_map
-    )
 
     os.makedirs(
         "api/output",
         exist_ok=True
+    )
+
+
+
+    # SAVE PROBABILITY RASTER
+
+
+    probability_path = (
+        "api/output/live_probability.npy"
+    )
+
+    np.save(
+        probability_path,
+        probability_map
+    )
+
+
+
+    # GENERATE GEOJSON
+
+
+    geojson = raster_to_geojson(
+        binary_map
     )
 
     geojson_path = (
@@ -80,34 +118,97 @@ def run_prediction(
     )
 
     with open(geojson_path, "w") as f:
-        json.dump(geojson, f)
+
+        json.dump(
+            geojson,
+            f
+        )
+
+
+
+    # SUMMARY METRICS
+
+
+    predicted_pixels = int(
+        binary.sum()
+    )
+
+    total_pixels = int(
+        binary.size
+    )
+
+    percentage = round(
+        100 * binary.mean(),
+        2
+    )
+
+    probability_mean = float(
+        probability_map.mean()
+    )
+
+    probability_std = float(
+        probability_map.std()
+    )
+
+
+    print("\nLIVE INFERENCE COMPLETE")
+    print("=" * 50)
+
+    print(
+        f"Predicted change: "
+        f"{percentage}%"
+    )
+
+    print(
+        f"Probability mean: "
+        f"{probability_mean:.4f}"
+    )
+
+    print(
+        f"GeoJSON saved: "
+        f"{geojson_path}"
+    )
+
+
+
+    # API RESPONSE
+
 
     return {
+
+        "mode": "live_hybrid_inference",
 
         "threshold": threshold,
 
         "forecast_steps": steps,
 
-        "predicted_change_pixels": int(
-            binary.sum()
-        ),
+        "predicted_change_pixels":
+            predicted_pixels,
 
-        "total_pixels": int(
-            binary.size
-        ),
+        "total_pixels":
+            total_pixels,
 
         "predicted_change_percentage":
-            round(
-                100 * binary.mean(),
-                2
-            ),
+            percentage,
 
         "probability_mean":
-            float(probability_map.mean()),
+            probability_mean,
 
         "probability_std":
-            float(probability_map.std()),
+            probability_std,
 
         "geojson_file":
-            geojson_path
+            geojson_path,
+
+        "temperature_live": True,
+
+        "ndvi_live": True,
+
+        "static_features": [
+
+            "population",
+            "elevation",
+            "water",
+            "landcover"
+        ]
     }
