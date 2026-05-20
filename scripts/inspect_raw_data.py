@@ -25,7 +25,7 @@ with rasterio.open(reference_path) as ref:
     ref_bounds = ref.bounds
     ref_res = ref.res
 
-print("\n===================================")
+
 print("REFERENCE RASTER")
 
 
@@ -37,9 +37,9 @@ print(f"Height: {ref_height}")
 print(f"Bounds: {ref_bounds}")
 print(f"Resolution: {ref_res}")
 
-print("\n===================================")
+
 print("VALIDATION RESULTS")
-print("===================================")
+
 
 all_valid = True
 
@@ -92,14 +92,13 @@ for filename in os.listdir(DATA_DIR):
                 print(f"- {issue}")
 
 
-print("\n===================================")
+
 
 if all_valid:
 
-    print("ALL RASTERS ARE MACHINE LEARNING READY")
+    print("SUCCESS")
 
 else:
 
-    print("SOME RASTERS FAILED VALIDATION")
+    print("SOME RASTERS FAILED")
 
-print("===================================")
