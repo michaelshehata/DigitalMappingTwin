@@ -30,8 +30,6 @@ cm = pd.read_csv(INPUT_CSV).values
 
 
 # NORMALISE ROWS
-# Makes interpretation MUCH easier visually because each
-# row becomes percentages of the true class.
 
 
 cm_normalised = cm.astype(float) / cm.sum(axis=1, keepdims=True)

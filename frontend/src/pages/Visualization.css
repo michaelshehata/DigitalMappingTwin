@@ -1,205 +1,425 @@
-h2{
-  text-align: center;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-.visualization-page {
-  width: 100%;
-  min-height: 100vh;
-  background: black;
-  color: white;
-  padding: 2rem;
+* {
   box-sizing: border-box;
 }
 
-.visualization-layout {
-  display: grid;
-  grid-template-columns: 320px 1fr 320px;
-  gap: 2rem;
-  align-items: start;
-}
-
-/* LEFT PANEL */
-
-.controls-panel {
-  background: #000;
-
-  padding: 2rem;
-  height: 700px;
-}
-
-.controls-panel h2 {
-  margin-bottom: 2rem;
-  font-size: 2.4rem;
-}
-
-.slider-group {
-  margin-bottom: 2rem;
-}
-
-.slider-group label {
-  display: block;
-  margin-bottom: 0.8rem;
-  font-size: 1rem;
-}
-
-.slider-group input {
-  width: 100%;
-}
-
-.run-button {
-  width: 100%;
-  padding: 1rem;
-  border-radius: 14px;
-  border: none;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-top: 1rem;
-}
-
-/* CENTER PANEL */
-
-.globe-panel {
-  height: 700px;
-  overflow: hidden;
-}
-
-/* RIGHT PANEL */
-
-.analytics-panel {
-  background: #000;
-
-
-  padding: 1.5rem;
-
-  height: 700px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.analytics-panel h2 {
-  margin-bottom: 2rem;
-  font-size: 2.4rem;
-}
-
-.stat-card {
-  background: #020b30;
-
-
-  padding: 1rem;
-  margin-bottom: 1rem;
-
-  min-height: 90px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  text-align: center;
-}
-
-.stat-card h3 {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-  line-height: 1.3;
-  text-align: center;
-}
-
-.stat-card p {
-  font-size: 1rem;
-  text-align: center;
-}
-
-.prediction-toggle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  gap: 14px;
-
-  padding: 20px;
-}
-
-/* Hide default checkbox */
-.prediction-switch input {
-  display: none;
-}
-
-.prediction-switch {
-  position: relative;
-  top: -20px;
-  width: 64px;
-  height: 34px;
-
-  display: inline-block;
-}
-
-.slider {
-  position: absolute;
-  inset: 0;
-
-  background: #111;
-
-  border-radius: 999px;
-
-  cursor: pointer;
-
-  transition: 0.25s ease;
-
-  border: 2px solid #444;
-
-  box-shadow:
-    0 0 8px rgba(255,255,255,0.08);
-}
-
-.slider::before {
-  content: "";
-
-  position: absolute;
-
-  width: 24px;
-  height: 24px;
-
-  left: 4px;
-  top: 3px;
-
-  background: white;
-
-  border-radius: 50%;
-
-  transition: 0.25s ease;
-}
-
-.prediction-switch input:checked + .slider {
-  background: #ffffff;
-
-  border-color: #ffffff;
-}
-
-.prediction-switch input:checked + .slider::before {
-  transform: translateX(28px);
-
-  background: #000;
-}
-
-.predictionText {
-
-
+html,
+body,
+#root {
   margin: 0;
+  width: 100%;
+  height: 100%;
+}
 
-  text-align: center;
+.dtVisualizationPage {
+  position: relative;
 
-  font-size: 1.2rem;
+  width: 100%;
+  height: 100vh;
 
-  font-weight: 600;
+  overflow-x: hidden;
 
   color: white;
 
-  letter-spacing: 0.5px;
+  font-family: "Inter", sans-serif;
 
-  text-shadow:
-    0 0 6px rgba(255,255,255,0.8),
-    0 0 12px rgba(255,255,255,0.4);
+  background:
+    radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      rgba(99, 102, 241, 0.22),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 80% 60% at 100% 40%,
+      rgba(139, 92, 246, 0.12),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 0% 85%,
+      rgba(59, 130, 246, 0.14),
+      transparent 45%
+    ),
+    linear-gradient(
+      180deg,
+      #020617 0%,
+      #0c1222 45%,
+      #060b14 100%
+    );
+}
+
+.dtVisualizationBackgroundOverlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.30),
+      rgba(0, 0, 0, 0.50)
+    );
+
+  pointer-events: none;
+}
+
+/*
+  MAIN LAYOUT
+*/
+
+.dtVisualizationDashboardLayout {
+  position: relative;
+  z-index: 2;
+
+  display: grid;
+
+  grid-template-columns:
+    240px
+    1fr
+    270px;
+
+  gap: 14px;
+
+  width: 100%;
+
+  height: calc(100vh - 72px);
+
+  padding:
+    86px
+    14px
+    14px
+    14px;
+}
+
+/*
+  GLASS PANELS
+*/
+
+.dtPanelGlassContainer {
+  width: 100%;
+  height: 100%;
+
+  background:
+    rgba(10, 15, 30, 0.58);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  backdrop-filter: blur(18px);
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 0 40px rgba(0, 0, 0, 0.28),
+    0 0 80px rgba(6, 182, 212, 0.03);
+
+  overflow-x: hidden;
+}
+
+/*
+  LEFT SIDEBAR
+*/
+
+.dtSimulationSidebar {
+  min-height: 0;
+}
+
+.dtSimulationSidebar .dtPanelGlassContainer {
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.dtSidebarTitle {
+  margin: 0;
+
+  font-size: 1.8rem;
+  font-weight: 700;
+
+  line-height: 1;
+}
+
+.dtSidebarSection {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.dtSidebarLabel {
+  font-size: 0.9rem;
+
+  opacity: 0.75;
+}
+
+.dtYearValueDisplay {
+  font-size: 2.2rem;
+  font-weight: 700;
+
+  color: #06b6d4;
+}
+
+.dtSimulationYearSlider {
+  width: 100%;
+}
+
+.dtSliderYearMarkers {
+  display: flex;
+  justify-content: space-between;
+
+  font-size: 0.72rem;
+
+  opacity: 0.55;
+}
+
+.dtGeneratePredictionButton {
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #2563eb,
+      #06b6d4
+    );
+
+  color: white;
+
+  font-size: 0.92rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.dtGeneratePredictionButton:hover {
+  transform: translateY(-2px);
+}
+
+/*
+  MAP
+*/
+
+.dtMapVisualizationSection {
+  min-width: 0;
+  min-height: 0;
+}
+
+.dtMapPanelContainer {
+  display: flex;
+  flex-direction: column;
+
+  min-height: 0;
+}
+
+.dtMapPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 18px 22px;
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.06);
+}
+
+.dtMapTitle {
+  margin: 0;
+
+  font-size: 1.9rem;
+  font-weight: 700;
+}
+
+.dtMapSubtitle {
+  margin-top: 4px;
+
+  font-size: 0.88rem;
+
+  opacity: 0.65;
+}
+
+.dtProjectionYearBadge {
+  padding: 8px 16px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(6,182,212,0.12);
+
+  border:
+    1px solid rgba(6,182,212,0.22);
+
+  color: #06b6d4;
+
+  font-weight: 700;
+}
+
+.dtLeafletMapWrapper {
+  flex: 1;
+
+  min-height: 0;
+  height: 100%;
+}
+
+.dtLeafletMap {
+  width: 100%;
+  height: 100%;
+}
+
+.leaflet-container {
+  background: #08111f;
+}
+
+/*
+  RIGHT SIDEBAR
+*/
+
+.dtLiveDataSidebar {
+  min-height: 0;
+}
+
+.dtLiveDataSidebar .dtPanelGlassContainer {
+  padding: 18px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.dtLiveDataHeader {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.dtLiveDataTitle {
+  margin: 0;
+
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.dtLastUpdatedText {
+  font-size: 0.78rem;
+
+  opacity: 0.6;
+}
+
+.dtLiveMetricGrid {
+  flex: 1;
+
+  display: grid;
+
+  grid-template-rows:
+    repeat(6, 1fr);
+
+  gap: 10px;
+
+  min-height: 0;
+}
+
+.dtLiveMetricCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  padding: 12px 14px;
+
+  border-radius: 16px;
+
+  background:
+    rgba(255,255,255,0.04);
+
+  border:
+    1px solid rgba(255,255,255,0.05);
+}
+
+.dtLiveMetricCard h3 {
+  margin: 0 0 6px 0;
+
+  font-size: 0.78rem;
+
+  opacity: 0.72;
+}
+
+.dtLiveMetricCard p {
+  margin: 0;
+
+  font-size: 1.2rem;
+  font-weight: 700;
+
+  color: #22c55e;
+}
+
+/*
+  LAND USE LEGEND/KEY
+*/
+
+.dtLegendContainer {
+
+  margin-top: 8px;
+
+  padding-top: 18px;
+
+  border-top:
+    1px solid rgba(255,255,255,0.08);
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.dtLegendTitle {
+
+  margin: 0;
+
+  font-size: 1rem;
+  font-weight: 700;
+
+  opacity: 0.9;
+}
+
+.dtLegendList {
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.dtLegendItem {
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  font-size: 0.9rem;
+
+  opacity: 0.9;
+}
+
+.dtLegendColour {
+
+  width: 18px;
+  height: 18px;
+
+  border-radius: 6px;
+
+  border:
+    1px solid rgba(255,255,255,0.18);
+
+  box-shadow:
+    0 0 12px rgba(255,255,255,0.08);
 }

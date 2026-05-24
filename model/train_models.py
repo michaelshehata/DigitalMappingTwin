@@ -37,17 +37,17 @@ os.makedirs(RESULTS_DIR, exist_ok=True)
 
 SNAPSHOT_YEARS = [1985, 1995, 2005, 2015, 2024]
 
-# Stratified split ratios applied independently per year.
-# Using StratifiedShuffleSplit instead of sequential block slicing
-# ensures minority classes (Water ~0.4%, Sparse ~0.1%) appear in
-# every subset rather than clustering in a single spatial block.
+''' Stratified split ratios applied independently per year.
+Using StratifiedShuffleSplit instead of sequential block slicing
+ensures minority classes (Water ~0.4%, Sparse ~0.1%) appear in
+every subset rather than clustering in a single spatial block.
+'''
+
 TRAIN_RATIO = 0.70
 VAL_RATIO   = 0.20
-# TEST_RATIO  = 0.10 (remainder)
+TEST_RATIO  = 0.10 
 
-# Set to True to apply SMOTE oversampling on the training set after
-# splitting. Useful if class_weight='balanced' alone is insufficient.
-# Requires: pip install imbalanced-learn
+
 USE_SMOTE = False
 
 
@@ -129,25 +129,6 @@ def print_class_distribution(y, label):
         print(f"    {name:15s} : {n:>8,}  ({100.0 * n / total:.2f}%)")
 
 
-# PER-YEAR STRATIFIED SPLIT
-#
-# Each snapshot year is split independently using
-# StratifiedShuffleSplit before concatenation. This preserves the
-# original spatial blocking rationale (every year contributes
-# proportionally to all three subsets) while additionally ensuring
-# that minority classes — Water (~0.4%) and Sparse (~0.1%) — are
-# represented in the validation and test subsets rather than
-# concentrating in whichever spatial block happens to contain them.
-#
-# The original sequential block split assigned pixels 0..train_end to
-# training, train_end..val_end to validation, and the remainder to
-# test. Since land cover classes are spatially autocorrelated, rare
-# classes that cluster in a single geographic region (e.g. Water near
-# the river Wensum) could fall almost entirely in one subset, starving
-# the others of any signal for those classes and producing the very
-# low macro F1 / near-zero per-class recall observed in the original
-# results.
-
 
 print("\nLoading and splitting datasets per year...\n")
 
@@ -179,12 +160,6 @@ for year in SNAPSHOT_YEARS:
     y = y[valid_mask].astype(np.int32)
 
     n = len(y)
-
-    
-    # Stratified split: train vs (val + test)
-    # StratifiedShuffleSplit guarantees that every class
-    # present in the full dataset appears in both the
-    # training subset and the held-out pool, in proportion.
     
 
     sss_traintest = StratifiedShuffleSplit(
@@ -198,10 +173,10 @@ for year in SNAPSHOT_YEARS:
     y_temp = y[temp_idx]
 
     
-    # Stratified split: val vs test from the held-out pool.
-    # VAL_RATIO is expressed as a fraction of the full
-    # dataset; here we convert it to a fraction of temp.
-    
+    ''' Stratified split: val vs test from the held out pool.
+     VAL_RATIO is expressed as a fraction of the full
+     dataset; here we convert it to a fraction of temp.
+    '''
 
     val_fraction_of_temp = VAL_RATIO / (1.0 - TRAIN_RATIO)
 
@@ -251,12 +226,10 @@ print_class_distribution(y_test,  "Test ")
 
 
 # OPTIONAL SMOTE OVERSAMPLING
-#
+
 # Applied only to X_train / y_train after the split so that
 # no synthetic samples leak into the validation or test sets.
-# SMOTETomek combines SMOTE oversampling of minority classes
-# with Tomek link removal to clean ambiguous majority-class
-# samples near the decision boundary.
+
 
 
 if USE_SMOTE:
@@ -287,8 +260,6 @@ rf_configs = [
     },
     {
         "name": "RF_3",
-        # max_depth=None means fully grown trees (unconstrained depth).
-        # This matches the report's Table 6 which specifies None for RF_3.
         "n_estimators": 300,
         "max_depth": None,
         "min_samples_split": 10
@@ -357,18 +328,13 @@ def evaluate_model(model_name, model, X_eval, y_eval):
 
 
 # TRAINING LOOP
-#
+
 # Workflow:
 #   1. Train each configuration on X_train.
 #   2. Evaluate on X_val to select the best config per
 #      model family (highest macro F1).
 #   3. Re-evaluate the winning config on X_test for the
 #      final unbiased reported metrics.
-#
-# The test set is accessed exactly once per model family,
-# only after the best configuration has been identified
-# via the validation set. This prevents the test set from
-# influencing any model selection decisions.
 
 
 val_results  = []
@@ -376,11 +342,6 @@ test_results = []
 
 NUM_CLASSES = len(np.unique(np.concatenate([y_train, y_val, y_test])))
 
-# Pre-compute sample weights for XGBoost once, based on training labels.
-# compute_sample_weight('balanced') assigns each sample a weight
-# inversely proportional to its class frequency, so the gradient
-# updates from Water and Sparse samples are amplified to match those
-# of the dominant Agricultural class.
 xgb_sample_weights = compute_sample_weight(class_weight="balanced", y=y_train)
 
 
@@ -402,14 +363,6 @@ for config in rf_configs:
 
     start_train = time.time()
 
-    # class_weight='balanced' scales each class's contribution to the
-    # Gini impurity calculation in every tree by the inverse of its
-    # frequency. This means a split that correctly separates a Water
-    # pixel receives the same impurity-reduction credit as one that
-    # correctly separates ~160 Agricultural pixels (reflecting the
-    # ~0.4% vs ~65% frequency ratio). Without this, the forest
-    # effectively ignores minority classes because the impurity gain
-    # from splitting them is negligible relative to the majority class.
     model = RandomForestClassifier(
         n_estimators=config["n_estimators"],
         max_depth=config["max_depth"],
@@ -462,8 +415,6 @@ print(f"  Test macro F1: {test_metrics['macro_f1']:.4f} | "
 
 # XGBoost
 
-
-
 print("TRAINING XGBOOST MODELS")
 
 
@@ -478,11 +429,9 @@ for config in xgb_configs:
 
     start_train = time.time()
 
-    # XGBoost does not accept class_weight directly. Instead,
-    # per-sample weights are passed to model.fit() via the
-    # sample_weight argument. These were pre-computed above using
-    # compute_sample_weight('balanced') so that the boosting gradient
-    # treats each class equally regardless of pixel frequency.
+    '''XGBoost does not accept class_weight directly. Instead,
+    per sample weights are passed to model.fit() via the sample_weight argument. 
+    '''
     model = XGBClassifier(
         n_estimators=config["n_estimators"],
         max_depth=config["max_depth"],
@@ -515,7 +464,6 @@ for config in xgb_configs:
 
 # Final test evaluation for best XGB only
 print(f"\nBest XGB config: {best_xgb_name} (val macro F1: {best_xgb_val_f1:.4f})")
-print(f"Evaluating {best_xgb_name} on test set...")
 
 test_metrics = evaluate_model(best_xgb_name + "_test", best_xgb_model, X_test, y_test)
 test_metrics["train_time_seconds"] = best_xgb_time

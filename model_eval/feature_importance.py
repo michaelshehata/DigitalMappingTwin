@@ -40,8 +40,7 @@ original_features = [
 df["feature"] = original_features
 
 
-# GROUP FEATURES INTO CONCEPTUAL DATASETS
-# Keeps consistency with dissertation terminology
+# GROUP FEATURES INTO CONCEPT DATASETS
 
 
 group_mapping = {

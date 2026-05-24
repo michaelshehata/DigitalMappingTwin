@@ -1,5 +1,5 @@
 """
-All outputs match:
+All outputs should match:
 - elevation.tif CRS
 - dimensions
 - transform
@@ -250,7 +250,7 @@ def validate_output(output_path, reference):
 
         assert out.height == reference["height"]
 
-    print("    Validation passed — matches reference grid exactly")
+    print("Validation passed, matches reference grid")
 
 
 

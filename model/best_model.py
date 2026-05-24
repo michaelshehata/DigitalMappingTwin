@@ -29,7 +29,7 @@ SNAPSHOT_YEARS = [1985, 1995, 2005, 2015, 2024]
 
 NODATA_LABEL = 255
 
-# Best validated Random Forest configuration
+# Best Random Forest configuration
 RF3_PARAMS = {
     "n_estimators": 300,
     "max_depth": None,
@@ -235,9 +235,7 @@ def main():
 
     
     # Scale features
-    
 
-    print("\nFitting MinMaxScaler...")
 
     scaler = MinMaxScaler()
 
@@ -320,7 +318,7 @@ def main():
 
         f.write("\n".join(dist_lines))
 
-    print(f"Class distribution saved → {dist_path}")
+
 
     
     # Final summary
@@ -330,9 +328,6 @@ def main():
     print(f"  Model  : {model_path}")
     print(f"  Scaler : {scaler_path}")
 
-    print("\nInference example:\n")
-
-    print("import joblib")
 
     print(f"model = joblib.load(r'{model_path}')")
     print(f"scaler = joblib.load(r'{scaler_path}')")

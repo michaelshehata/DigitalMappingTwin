@@ -1,6 +1,6 @@
-/* =====================
+/* 
    HEADER
-===================== */
+ */
 .header {
   position: fixed;
   top: 0;
@@ -10,9 +10,9 @@
   z-index: 3000;
 }
 
-/* =====================
+/* 
    NAV BAR
-===================== */
+ */
 .nav {
   height: 64px;
   display: flex;
@@ -23,9 +23,9 @@
   position: relative;
 }
 
-/* =====================
+/* 
    LOGO
-===================== */
+ */
 .logo {
   position: absolute;
   left: 20px;
@@ -40,9 +40,9 @@
   width: 32px;
 }
 
-/* =====================
+/* 
    DESKTOP LINKS
-===================== */
+ */
 .nav-links {
   display: flex;
   gap: 3rem;
@@ -61,9 +61,9 @@
   opacity: 0.8;
 }
 
-/* =====================
+/* 
    HAMBURGER
-===================== */
+*/
 .hamburger {
   position: absolute;
   right: 20px;
@@ -95,9 +95,9 @@
   transform: rotate(-45deg) translate(6px, -6px);
 }
 
-/* =====================
+/* 
    FULLSCREEN MOBILE MENU
-===================== */
+ */
 .mobile-menu {
   position: fixed;
   top: 0;
@@ -125,9 +125,9 @@
   pointer-events: auto;
 }
 
-/* =====================
+/* 
    MOBILE MENU CONTENT
-===================== */
+ */
 .menu-content {
   display: flex;
   flex-direction: column;
@@ -152,9 +152,9 @@
   opacity: 1;
 }
 
-/* =====================
+/* 
    RESPONSIVE RULES
-===================== */
+ */
 @media (max-width: 900px) {
   .nav-links {
     display: none;

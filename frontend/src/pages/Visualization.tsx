@@ -1,278 +1,478 @@
-import { useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 
-import GlobeView from "../components/MapView";
+import {
+  MapContainer,
+  TileLayer,
+  ImageOverlay,
+} from "react-leaflet";
 
+import "leaflet/dist/leaflet.css";
 import "./Visualization.css";
 
-function Visualization() {
+/*
+  Norwich Bounds
+*/
 
-  const [threshold, setThreshold] =
-    useState(0.35);
+const imageBounds: [
+  [number, number],
+  [number, number]
+] = [
+  [52.56, 1.18],
+  [52.70, 1.42],
+];
 
-  const [steps, setSteps] =
-    useState(10);
+function VisualizationPage() {
 
-  const [showProbability, setShowProbability] =
-    useState(true);
+  /*
+    Slider State
+  */
 
-  const [showBinary, setShowBinary] =
-    useState(true);
+  const [sliderValue, setSliderValue] =
+    useState(1);
 
-  const [showNDVI, setShowNDVI] =
-    useState(false);
+  /*
+    Active Forecast Year
+  */
 
-  const [loading, setLoading] =
-    useState(false);
+  const [activeYear, setActiveYear] =
+    useState(2034);
 
-  const [analytics, setAnalytics] =
-    useState<any>(null);
+  /*
+    Last Updated State
+  */
 
-  const runSimulation = async () => {
+  const [lastUpdated, setLastUpdated] =
+    useState("--");
 
-    try {
+  /*
+    Year Calculation
+  */
 
-      setLoading(true);
+  const simulationYear =
+    2024 + (sliderValue * 10);
 
-      const response = await axios.post(
-        `http://127.0.0.1:8000/predict?threshold=${threshold}&steps=${steps}`
-      );
+  /*
+    Live Data State
+  */
 
-      setAnalytics(response.data);
+  const [liveData, setLiveData] =
+    useState({
 
-    } catch (error) {
+      temperature: "--",
 
-      console.error(error);
+      rainfall: "--",
 
-    } finally {
+      windSpeed: "--",
 
-      setLoading(false);
+      humidity: "--",
+
+      floodRisk: "--",
+
+      elevation: "27m ASL",
+
+    });
+
+  /*
+    Live API Fetch
+  */
+
+  useEffect(() => {
+
+    async function fetchLiveData() {
+
+      try {
+
+        /*
+          WEATHER DATA
+        */
+
+        const weatherResponse =
+          await fetch(
+            "https://api.open-meteo.com/v1/forecast?latitude=52.6309&longitude=1.2974&current=temperature_2m,precipitation,windspeed_10m,relative_humidity_2m"
+          );
+
+        const weatherData =
+          await weatherResponse.json();
+
+        /*
+          FLOOD DATA
+        */
+
+        const floodResponse =
+          await fetch(
+            "https://environment.data.gov.uk/flood-monitoring/id/stations"
+          );
+
+        const floodData =
+          await floodResponse.json();
+
+        /*
+          UPDATE STATE
+        */
+
+        setLiveData({
+
+          temperature:
+            weatherData.current
+              ?.temperature_2m ?? "--",
+
+          rainfall:
+            weatherData.current
+              ?.precipitation ?? "--",
+
+          windSpeed:
+            weatherData.current
+              ?.windspeed_10m ?? "--",
+
+          humidity:
+            weatherData.current
+              ?.relative_humidity_2m ?? "--",
+
+          floodRisk:
+            floodData.items?.length
+              ? "Monitoring"
+              : "Low",
+
+          elevation: "27m ASL",
+
+        });
+
+        /*
+          LAST UPDATED TIME
+        */
+
+        const now = new Date();
+
+        setLastUpdated(
+
+          now.toLocaleTimeString(
+            [],
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          )
+
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Failed to fetch live data",
+          error
+        );
+
+      }
 
     }
+
+    fetchLiveData();
+
+    const interval =
+      setInterval(
+        fetchLiveData,
+        60000
+      );
+
+    return () =>
+      clearInterval(interval);
+
+  }, []);
+
+  /*
+    Generate Prediction
+  */
+
+  const generatePrediction = () => {
+
+    setActiveYear(
+      simulationYear
+    );
+
   };
 
   return (
-    <div className="visualization-page">
 
-      <div className="visualization-layout">
+    <main className="dtVisualizationPage">
 
-        {/* LEFT PANEL */}
+      <div className="dtVisualizationBackgroundOverlay" />
 
-        <div className="controls-panel">
+      <div className="dtVisualizationDashboardLayout">
 
-          <h2>
-            Simulation Controls
-          </h2>
+        {/* LEFT SIDEBAR */}
 
-          <div className="slider-group">
+        <section className="dtSimulationSidebar">
 
-            <label>
-              Threshold: {threshold.toFixed(2)}
-            </label>
+          <div className="dtPanelGlassContainer">
 
-            <input
-              type="range"
-              min="0.1"
-              max="0.9"
-              step="0.01"
-              value={threshold}
-              onChange={(e) =>
-                setThreshold(
-                  Number(e.target.value)
-                )
+            <h2 className="dtSidebarTitle">
+              Simulation Controls
+            </h2>
+
+            <div className="dtSidebarSection">
+
+              <label className="dtSidebarLabel">
+                Simulation Year
+              </label>
+
+              <div className="dtYearValueDisplay">
+                {simulationYear}
+              </div>
+
+              <input
+                type="range"
+                min="0"
+                max="10"
+                step="1"
+                value={sliderValue}
+                onChange={(e) =>
+                  setSliderValue(
+                    Number(e.target.value)
+                  )
+                }
+                className="dtSimulationYearSlider"
+              />
+
+              <div className="dtSliderYearMarkers">
+                <span>2024</span>
+                <span>2124</span>
+              </div>
+
+            </div>
+
+            <button
+              className="dtGeneratePredictionButton"
+              onClick={
+                generatePrediction
               }
-            />
+            >
+              Generate Prediction
+            </button>
 
-          </div>
+            {/* LAND COVER LEGEND */}
 
-          <div className="slider-group">
+            <div className="dtLegendContainer">
 
-            <label>
-              Forecast Steps: {steps}
-            </label>
+              <h3 className="dtLegendTitle">
+                Land Use Key
+              </h3>
 
-            <input
-              type="range"
-              min="1"
-              max="30"
-              step="1"
-              value={steps}
-              onChange={(e) =>
-                setSteps(
-                  Number(e.target.value)
-                )
-              }
-            />
+              <div className="dtLegendList">
 
-          </div>
-
-          <div className="prediction-toggle">
-
-            <label className="prediction-switch">
-
-              <input
-                type="checkbox"
-                checked={showProbability}
-                onChange={(e) =>
-                  setShowProbability(
-                    e.target.checked
-                  )
-                }
-              />
-
-              <span className="slider"></span>
-
-            </label>
-
-            <p className="predictionText">
-              Probability Layer
-            </p>
-
-          </div>
-
-          <div className="prediction-toggle">
-
-            <label className="prediction-switch">
-
-              <input
-                type="checkbox"
-                checked={showBinary}
-                onChange={(e) =>
-                  setShowBinary(
-                    e.target.checked
-                  )
-                }
-              />
-
-              <span className="slider"></span>
-
-            </label>
-
-            <p className="predictionText">
-              Binary Prediction
-            </p>
-
-          </div>
-
-          <div className="prediction-toggle">
-
-            <label className="prediction-switch">
-
-              <input
-                type="checkbox"
-                checked={showNDVI}
-                onChange={(e) =>
-                  setShowNDVI(
-                    e.target.checked
-                  )
-                }
-              />
-
-              <span className="slider"></span>
-
-            </label>
-
-            <p className="predictionText">
-              NDVI Layer
-            </p>
-
-          </div>
-
-          <button
-            className="run-button"
-            onClick={runSimulation}
-          >
-            {
-              loading
-                ? "Running..."
-                : "Run Simulation"
-            }
-          </button>
-
-        </div>
-
-        {/* CENTER PANEL */}
-
-        <div className="globe-panel">
-
-          <GlobeView
-            showProbability={showProbability}
-            showBinary={showBinary}
-            showNDVI={showNDVI}
-          />
-
-        </div>
-
-        {/* RIGHT PANEL */}
-
-        <div className="analytics-panel">
-
-          <h2>
-            Simulation Analytics
-          </h2>
-
-          {
-            analytics && (
-              <>
-
-                <div className="stat-card">
-                  <h3>
-                    Predicted Change
-                  </h3>
-
-                  <p>
-                    {
-                      analytics.predicted_change_percentage
-                    }%
-                  </p>
+                <div className="dtLegendItem">
+                  <span
+                    className="dtLegendColour"
+                    style={{
+                      background: "#2e7d32"
+                    }}
+                  />
+                  <span>Vegetation</span>
                 </div>
 
-                <div className="stat-card">
-                  <h3>
-                    Changed Pixels
-                  </h3>
-
-                  <p>
-                    {
-                      analytics.predicted_change_pixels
-                    }
-                  </p>
+                <div className="dtLegendItem">
+                  <span
+                    className="dtLegendColour"
+                    style={{
+                      background: "#fdd835"
+                    }}
+                  />
+                  <span>Agricultural</span>
                 </div>
 
-                <div className="stat-card">
-                  <h3>
-                    Probability Mean
-                  </h3>
-
-                  <p>
-                    {
-                      analytics.probability_mean.toFixed(3)
-                    }
-                  </p>
+                <div className="dtLegendItem">
+                  <span
+                    className="dtLegendColour"
+                    style={{
+                      background: "#d32f2f"
+                    }}
+                  />
+                  <span>Urban</span>
                 </div>
 
-                <div className="stat-card">
-                  <h3>
-                    Probability Std
-                  </h3>
-
-                  <p>
-                    {
-                      analytics.probability_std.toFixed(3)
-                    }
-                  </p>
+                <div className="dtLegendItem">
+                  <span
+                    className="dtLegendColour"
+                    style={{
+                      background: "#1565c0"
+                    }}
+                  />
+                  <span>Water</span>
                 </div>
 
-              </>
-            )
-          }
+                <div className="dtLegendItem">
+                  <span
+                    className="dtLegendColour"
+                    style={{
+                      background: "#8d6e63"
+                    }}
+                  />
+                  <span>Sparse</span>
+                </div>
 
-        </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* MAP */}
+
+        <section className="dtMapVisualizationSection">
+
+          <div className="dtPanelGlassContainer dtMapPanelContainer">
+
+            <div className="dtMapPanelHeader">
+
+              <div>
+
+                <h2 className="dtMapTitle">
+                  Norwich Digital Twin
+                </h2>
+
+                <p className="dtMapSubtitle">
+                  Interactive Environmental Projection
+                </p>
+
+              </div>
+
+              <div className="dtProjectionYearBadge">
+                {activeYear}
+              </div>
+
+            </div>
+
+            <div className="dtLeafletMapWrapper">
+
+              <MapContainer
+                center={[52.6309, 1.2974]}
+                zoom={11}
+                scrollWheelZoom={true}
+                className="dtLeafletMap"
+              >
+
+                <TileLayer
+                  attribution="&copy; OpenStreetMap contributors"
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+
+                <ImageOverlay
+                  url={`/forecasts/forecast_${activeYear}.png`}
+                  bounds={imageBounds}
+                  opacity={0.72}
+                />
+
+              </MapContainer>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* RIGHT SIDEBAR */}
+
+        <section className="dtLiveDataSidebar">
+
+          <div className="dtPanelGlassContainer">
+
+            <div className="dtLiveDataHeader">
+
+              <h2 className="dtLiveDataTitle">
+                Live Data
+              </h2>
+
+              <span className="dtLastUpdatedText">
+                Updated: {lastUpdated}
+              </span>
+
+            </div>
+
+            <div className="dtLiveMetricGrid">
+
+              <div className="dtLiveMetricCard">
+
+                <h3>
+                  Temperature
+                </h3>
+
+                <p>
+                  {liveData.temperature}°C
+                </p>
+
+              </div>
+
+              <div className="dtLiveMetricCard">
+
+                <h3>
+                  Rainfall
+                </h3>
+
+                <p>
+                  {liveData.rainfall} mm
+                </p>
+
+              </div>
+
+              <div className="dtLiveMetricCard">
+
+                <h3>
+                  Wind Speed
+                </h3>
+
+                <p>
+                  {liveData.windSpeed} km/h
+                </p>
+
+              </div>
+
+              <div className="dtLiveMetricCard">
+
+                <h3>
+                  Humidity
+                </h3>
+
+                <p>
+                  {liveData.humidity}%
+                </p>
+
+              </div>
+
+              <div className="dtLiveMetricCard">
+
+                <h3>
+                  Flood Status
+                </h3>
+
+                <p>
+                  {liveData.floodRisk}
+                </p>
+
+              </div>
+
+              <div className="dtLiveMetricCard">
+
+                <h3>
+                  Elevation
+                </h3>
+
+                <p>
+                  {liveData.elevation}
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
 
       </div>
 
-    </div>
+    </main>
   );
 }
 
-export default Visualization;
+export default VisualizationPage;
